@@ -21,7 +21,7 @@ function deepEqual(object1, object2) {
         if (obj1_keys[i] !== obj2_keys[i] && object1[obj1_keys[i]] !== object2[obj2_keys[i]])
             return false;
         // Checks if the value holds another object. If so, we need to do another deep check.
-        if (typeof(object1[obj1_keys[i]]) == "object") {
+        if (typeof(object1[obj1_keys[i]]) == "object" && object1[obj1_keys[i]] != null) {
             if (!deepEqual(object1[obj1_keys[i]], object2[obj2_keys[i]]))
                 return false;
         }
