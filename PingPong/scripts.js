@@ -9,22 +9,24 @@ let ctx = canvas.getContext("2d");
 let width = canvas.width;
 let height = canvas.height;
 
-const player_width = 10;
-const player_height = 50;
+const paddle_width = 10;
+const paddle_height = 50;
 const player_xcoord = 35;
-let player_ycoord = (height / 2) - (player_height / 2);
-
-const ai_width = 10;
-const ai_height = 50;
 const ai_xcoord = width - 35;
-let ai_ycoord = (height / 2) - (ai_height / 2);
-let ai_speed = 10;
+
+let player_ycoord = (height / 2) - (paddle_height / 2);
+let ai_ycoord = (height / 2) - (paddle_height / 2);
+let ai_speed = 15;
 
 let pong_size = 10;
 let pong_xcoord = width / 2 - pong_size / 2;
 let pong_ycoord = height / 2 - pong_size / 2;
 let pong_xspeed = 2;
 let pong_yspeed = 4;
+
+paused = false;
+prev_xspeed = pong_xspeed;
+prev_yspeed = pong_yspeed;
 
 function drawBackground() {
     ctx.fillStyle = "black";
@@ -34,14 +36,13 @@ function drawBackground() {
 
 function drawPlayer(size=player_height) {
     ctx.fillStyle = "red";
-    //console.log(player_xcoord + " " + player_ycoord + " " + player_width + " " + size);
-    ctx.fillRect(player_xcoord, player_ycoord, player_width, size);
+    ctx.fillRect(player_xcoord, player_ycoord, paddle_width, size);
     ctx.fill();
 }
 
 function drawAI() {
     ctx.fillStyle = "blue";
-    ctx.fillRect(ai_xcoord, ai_ycoord, ai_width, ai_height);
+    ctx.fillRect(ai_xcoord, ai_ycoord, paddle_width, paddle_height);
     ctx.fill();
 }
 
@@ -51,124 +52,75 @@ function drawPong(size=pong_size) {
 }
 
 function updateBall() {
-    pong_xcoord -= pong_xspeed;
-    pong_ycoord -= pong_yspeed;
+    pong_xcoord += pong_xspeed;
+    pong_ycoord += pong_yspeed;
 }
 
 function redrawScreen() {
-    //ctx.clearRect(0, 0, width, height);
     drawBackground();
-    drawPlayer(player_height);
+    drawPlayer(paddle_height);
     drawAI();
     drawPong();
-    //setTimeout(redrawScreen, 30);
 }
 
+// For keyboard presses.
 function movePlayerUp() {
     if (player_ycoord == 0)
         return;
-    player_ycoord -= 20;
+    player_ycoord -= 10;
     if (player_ycoord <= 0)
         player_ycoord = 0;
-    redrawScreen();
+
 }
 
+// For keyboard presses.
 function movePlayerDown() {
-    if (player_ycoord + player_height == height)
+    if (player_ycoord + paddle_height == height)
         return;
-    player_ycoord += 20;
-    if (player_ycoord + player_height >= height)
-        player_ycoord = height - player_height;
-    redrawScreen();
+    player_ycoord += 10;
+    if (player_ycoord + paddle_height >= height)
+        player_ycoord = height - paddle_height;
+
 }
 
+// Moves the AI if the ball is above or below the handle.
 function moveAI() {
-    if (pong_xspeed > 0)
+    if (pong_xspeed < 0)
         return;
-    if (pong_ycoord >= ai_ycoord && pong_ycoord <= ai_ycoord + ai_height)
+    if (pong_ycoord >= ai_ycoord && pong_ycoord <= ai_ycoord + paddle_height)
         return;
-    else if (pong_ycoord - 2 >= ai_ycoord)
+    else if (pong_ycoord - 5 >= ai_ycoord)
         ai_ycoord += ai_speed;
-    else if (pong_ycoord + 2 <= ai_ycoord)
+    else if (pong_ycoord + 5 <= ai_ycoord)
         ai_ycoord -= ai_speed;
 
     if (ai_ycoord <= 0)
         ai_ycoord = 0; //don't go up
-    else if (ai_ycoord + ai_height >= height)
-        ai_ycoord = height - ai_height; //don't go down
-    redrawScreen();
+    else if (ai_ycoord + paddle_height >= height)
+        ai_ycoord = height - paddle_height; //don't go down
+
 }
 
 function updateCollisions() {
-    // Check left of pong and screen
+    // Check left and right of pong and screen.
+    // Currently bounces off for testing purposes.
     if (pong_xcoord <= 0 || pong_xcoord + pong_size >= width) {
-        pong_xspeed = 0;
-        pong_yspeed = 0;
+        pong_xspeed *= -1;
     }
-    // Check top and bottom of pong and screen
+    // Check top and bottom of pong and screen.
     else if (pong_ycoord <= 0 || pong_ycoord + pong_size >= height) {
         pong_yspeed *= -1;
     }
-// Player Collisions
-    // Check right of pong and screen.
-    // Check left of pong and right of player.
-    else if (
-             pong_xcoord == player_xcoord + player_width &&
-             pong_ycoord <= player_ycoord + player_height &&
-             pong_ycoord >= player_ycoord
-            ) {
-        console.log("Hit the player first");
-        pong_xspeed *= -1;
-        }
 
-    // Check pong and player hitboxes (top and bottom).
-    else if (pong_xcoord <= player_xcoord + player_width  &&
-             pong_ycoord <= player_ycoord + player_height &&
-             pong_xcoord - pong_size <= player_xcoord     &&
-             pong_ycoord + pong_size >= player_ycoord
-            )
-            {console.log("Hit the player second");
-        pong_yspeed *= -1;
-            }
-// AI Collisions
-    // Check right of pong and left of AI.
-    else if (pong_xcoord + pong_size == ai_xcoord && 
-             pong_ycoord <= ai_ycoord + ai_height && 
-             pong_ycoord >= ai_ycoord
-            ) { console.log("Hit left of AI");
-            pong_xspeed *= -1;
-            }
-    // Check pong and AI hitboxes (top and bottom).
-    else if (   pong_xcoord >= ai_xcoord - ai_width &&
-                pong_ycoord <= ai_ycoord + ai_height &&
-                pong_xcoord + pong_size >= ai_xcoord &&
-                pong_ycoord + pong_size >= ai_ycoord
-            ) { console.log("hit AI hitbox");
-        pong_yspeed *= -1;
-            }
-    // if (pong_xcoord + pong_size <= player_xcoord)
-    //     console.log("pong_xcoord + pong_size <= player_xcoord");
-    // if (pong_xcoord + pong_size >= ai_xcoord)
-    //     console.log("pong_xcoord + pong_size >= ai_xcoord");
-
-    //console.log(pong_xcoord + pong_size == ai_xcoord);
-    //console.log(pong_ycoord <= ai_ycoord + ai_height);
-    //console.log(pong_ycoord >= ai_ycoord);
-    //console.log(pong_xcoord + pong_size == ai_xcoord && pong_ycoord <= ai_ycoord + ai_height && pong_ycoord >= ai_ycoord);
-    //console.log(pong_xcoord + " " + pong_ycoord + " " + pong_size + " " + ai_xcoord + " " + ai_ycoord + " " + ai_height);
-    // 255 117 10 265 110 50
-    //console.log(pong_xspeed);
 }
 
-paused = false;
-prev_xspeed = pong_xspeed;
-prev_yspeed = pong_yspeed;
+// The main loop of the program.
 function play() {
     redrawScreen();
     moveAI();
     updateCollisions();
     updateBall();
-    setTimeout(play, 10);
+    setTimeout(play, 30);
 }
 // Start of program
 drawPong(pong_size);
@@ -194,6 +146,14 @@ document.querySelector("html").addEventListener("keydown", e => {
             pong_xspeed = 0;
             pong_yspeed = 0;
         }
-    }
+    }   
+});
+
+document.querySelector("html").addEventListener("mousemove", e => {
+    player_ycoord = e.y - canvas.offsetTop;
+    if (player_ycoord < 0)
+        player_ycoord = 0;
+    else if (player_ycoord + paddle_height > height)
+        player_ycoord = height - paddle_height;
         
 });
