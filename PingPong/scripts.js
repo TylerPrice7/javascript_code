@@ -83,7 +83,7 @@ function movePlayerDown() {
 
 }
 
-// Moves the AI if the ball is above or below the handle.
+// Moves the AI if the ball is above or below the paddle.
 function moveAI() {
     // Whenever the updateBall function is changed, this statement needs to be adjusted.
     if (pong_xspeed > 0)
@@ -102,16 +102,15 @@ function moveAI() {
 
 }
 
-function adjustAngle(pong, handle) {
-    distanceFromTop = handle.top - pong.top;
-    distanceFromBottom = pong.bottom - handle.bottom;
-    if (distanceFromTop > 0) {
-        console.log("Top hit");
-        pong.pong_yspeed -= 0.5;
+// Changes the angle of the pong if it hits edges of paddle.
+function adjustAngle(pong, paddle) {
+    let distanceFromTop = pong.top - paddle.top;
+    let distanceFromBottom = paddle.bottom - pong.bottom;
+    if (distanceFromTop < 0) {
+        pong_yspeed -= 0.5;
     }
-    else if (distanceFromBottom > 0) {
-        console.log("Bottom hit");
-        pong.pong_ycoord += 0.5;
+    else if (distanceFromBottom < 0) {
+        pong_yspeed += 0.5;
     }
 }
 
@@ -149,8 +148,8 @@ function updateCollisions() {
     else if (
             pong.left < player.right && 
             pong.right > player.left &&
-            pong.top > player.top && 
-            pong.top < player.bottom
+            pong.top < player.bottom &&
+            pong.bottom > player.top
         ) {
         adjustAngle(pong, player);
         pong_xspeed = -Math.abs(pong_xspeed);
@@ -159,9 +158,9 @@ function updateCollisions() {
     // Absolute makes sure that it doesn't double bounce. 
     else if (
             pong.right > ai.left && 
-            pong.left < ai.right &&
-            pong.top > ai.top && 
-            pong.top < ai.bottom
+            pong.left < ai.right && 
+            pong.top < ai.bottom &&
+            pong.bottom > ai.top
         ) {
         adjustAngle(pong, ai);
         pong_xspeed = Math.abs(pong_xspeed);
@@ -175,7 +174,7 @@ function play() {
     //moveAI();
     updateCollisions();
     updateBall();
-    setTimeout(play, 30);
+    setTimeout(play, 60);
 }
 // Start of program
 drawPong(pong_size);
