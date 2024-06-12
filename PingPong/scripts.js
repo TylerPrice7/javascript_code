@@ -24,6 +24,13 @@ let pong_ycoord = height / 2 - pong_size / 2;
 let pong_xspeed = 2;
 let pong_yspeed = 4;
 
+let player_score = 0;
+let ai_score = 0;
+const reset_xpoint = pong_xcoord;
+const reset_ypoint = pong_ycoord;
+const reset_xspeed = pong_xspeed;
+const reset_yspeed = pong_yspeed;
+
 paused = false;
 prev_xspeed = pong_xspeed;
 prev_yspeed = pong_yspeed;
@@ -51,6 +58,18 @@ function drawPong(size=pong_size) {
     ctx.fillRect(pong_xcoord, pong_ycoord, size, size);
 }
 
+// Displays the current score. 
+// Note that drawScore does not have a fillStyle,
+// so it will copy whatever fillStyle is currently enabled.
+function drawScore() {
+    ctx.font = "30px monospace";
+    ctx.textAlign = "left";
+    ctx.fillText(player_score.toString(), 50, 50);
+    ctx.textAlign = "right";
+    ctx.fillText(ai_score.toString(), width - 50, 50);
+    ctx.fill();
+}
+
 function updateBall() {
     pong_xcoord -= pong_xspeed;
     pong_ycoord -= pong_yspeed;
@@ -61,6 +80,15 @@ function redrawScreen() {
     drawPlayer(paddle_height);
     drawAI();
     drawPong();
+    drawScore();
+}
+
+// Resets the coordinates and speed of the ping pong for a new game.
+function resetPong() {
+    pong_xcoord = reset_xpoint;
+    pong_ycoord = reset_ypoint;
+    pong_xspeed = reset_xspeed;
+    pong_yspeed = reset_yspeed;
 }
 
 // For keyboard presses.
@@ -136,7 +164,14 @@ function updateCollisions() {
 
     // Check left and right of pong and screen.
     // Currently bounces off for testing purposes.
-    if (pong.left <= 0 || pong.right >= width) {
+    if (pong.left <= 0) {
+        ai_score++;
+        resetPong();
+        pong_xspeed *= -1;
+    }
+    else if (pong.right >= width) {
+        player_score++;
+        resetPong();
         pong_xspeed *= -1;
     }
     // Check top and bottom of pong and screen.
@@ -165,16 +200,15 @@ function updateCollisions() {
         adjustAngle(pong, ai);
         pong_xspeed = Math.abs(pong_xspeed);
     }
-
 }
 
 // The main loop of the program.
 function play() {
-    redrawScreen();
     //moveAI();
     updateCollisions();
     updateBall();
-    setTimeout(play, 60);
+    redrawScreen();
+    setTimeout(play, 30);
 }
 // Start of program
 drawPong(pong_size);
