@@ -16,7 +16,7 @@ const ai_xcoord = width - 35;
 
 let player_ycoord = (height / 2) - (paddle_height / 2);
 let ai_ycoord = (height / 2) - (paddle_height / 2);
-let ai_speed = 15;
+let ai_speed = 5;
 
 let pong_size = 10;
 let pong_xcoord = width / 2 - pong_size / 2;
@@ -70,11 +70,13 @@ function drawScore() {
     ctx.fill();
 }
 
+// Updates position of the ball. Currently, it begins by moving top-left. 
 function updateBall() {
     pong_xcoord -= pong_xspeed;
     pong_ycoord -= pong_yspeed;
 }
 
+// Calls the draw functions.
 function redrawScreen() {
     drawBackground();
     drawPlayer(paddle_height);
@@ -113,20 +115,28 @@ function movePlayerDown() {
 
 // Moves the AI if the ball is above or below the paddle.
 function moveAI() {
+    let pong = {
+        top: pong_ycoord,
+        bottom: pong_ycoord + pong_size
+    };
+    let ai = {
+        top: ai_ycoord,
+        bottom: ai_ycoord + paddle_height
+    };
     // Whenever the updateBall function is changed, this statement needs to be adjusted.
     if (pong_xspeed > 0)
         return;
-    if (pong_ycoord >= ai_ycoord && pong_ycoord <= ai_ycoord + paddle_height)
-        return;
-    else if (pong_ycoord - 5 >= ai_ycoord)
-        ai_ycoord += ai_speed;
-    else if (pong_ycoord + 5 <= ai_ycoord)
+    else if (pong.top <= ai.top)
         ai_ycoord -= ai_speed;
 
-    if (ai_ycoord <= 0)
-        ai_ycoord = 0; //don't go up
-    else if (ai_ycoord + paddle_height >= height)
-        ai_ycoord = height - paddle_height; //don't go down
+    else if (pong.bottom >= ai.bottom)
+        ai_ycoord += ai_speed;
+
+    // Make sure the AI does not go above or below the game.
+    if (ai.top < 0)
+        ai_ycoord = 0;
+    else if (ai.bottom > height)
+        ai_ycoord = height - paddle_height;
 
 }
 
@@ -142,6 +152,7 @@ function adjustAngle(pong, paddle) {
     }
 }
 
+// Checks for all the collisions in the game.
 function updateCollisions() {
     let pong = {
         left : pong_xcoord,
@@ -163,16 +174,13 @@ function updateCollisions() {
     };
 
     // Check left and right of pong and screen.
-    // Currently bounces off for testing purposes.
     if (pong.left <= 0) {
         ai_score++;
         resetPong();
-        pong_xspeed *= -1;
     }
     else if (pong.right >= width) {
         player_score++;
         resetPong();
-        pong_xspeed *= -1;
     }
     // Check top and bottom of pong and screen.
     else if (pong.top <= 0 || pong.bottom >= height) {
@@ -204,7 +212,7 @@ function updateCollisions() {
 
 // The main loop of the program.
 function play() {
-    //moveAI();
+    moveAI();
     updateCollisions();
     updateBall();
     redrawScreen();
@@ -237,9 +245,10 @@ document.querySelector("html").addEventListener("keydown", e => {
     }   
 });
 
+// Moves the player's paddle according to
+// where their mouse is located on the y-axis.
 document.querySelector("html").addEventListener("mousemove", e => {
     player_ycoord = e.y - canvas.offsetTop;
-    ai_ycoord = e.y - canvas.offsetTop;
     if (player_ycoord < 0)
         player_ycoord = 0;
     else if (player_ycoord + paddle_height > height)
