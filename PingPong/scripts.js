@@ -1,7 +1,4 @@
-/*
-    First, we need to make the black canvas and the player's handle.
-    For now, let's make it so the player can move it's handle up and down.
-*/
+// All of the declarations will need to be cleaned up before completion.
 
 let canvas = document.querySelector("#canvas");
 let ctx = canvas.getContext("2d");
@@ -34,6 +31,9 @@ const reset_yspeed = pong_yspeed;
 paused = false;
 prev_xspeed = pong_xspeed;
 prev_yspeed = pong_yspeed;
+
+const SPEED_INCREMENT_COUNTER = 5;
+let paddle_bounces = 0;
 
 function drawBackground() {
     ctx.fillStyle = "black";
@@ -70,10 +70,10 @@ function drawScore() {
     ctx.fill();
 }
 
-// Updates position of the ball. Currently, it begins by moving top-left. 
+// Updates position of the ball. Currently, it begins by moving bottom-right. 
 function updateBall() {
-    pong_xcoord -= pong_xspeed;
-    pong_ycoord -= pong_yspeed;
+    pong_xcoord += pong_xspeed;
+    pong_ycoord += pong_yspeed;
 }
 
 // Calls the draw functions.
@@ -100,7 +100,6 @@ function movePlayerUp() {
     player_ycoord -= 10;
     if (player_ycoord <= 0)
         player_ycoord = 0;
-
 }
 
 // For keyboard presses.
@@ -110,7 +109,6 @@ function movePlayerDown() {
     player_ycoord += 10;
     if (player_ycoord + paddle_height >= height)
         player_ycoord = height - paddle_height;
-
 }
 
 // Moves the AI if the ball is above or below the paddle.
@@ -124,7 +122,7 @@ function moveAI() {
         bottom: ai_ycoord + paddle_height
     };
     // Whenever the updateBall function is changed, this statement needs to be adjusted.
-    if (pong_xspeed > 0)
+    if (pong_xspeed < 0 || paused)
         return;
     else if (pong.top <= ai.top)
         ai_ycoord -= ai_speed;
@@ -140,6 +138,18 @@ function moveAI() {
 
 }
 
+// Increases the speed of the pong when condiiton is true
+// TODO: Make it flash 'Speed Increasing'?
+function updatePongSpeed() {
+    if (paddle_bounces == 0)
+        return;
+    if (paddle_bounces % SPEED_INCREMENT_COUNTER == 0 ) {
+        if (pong_xspeed > 0) 
+            pong_xspeed += 1;
+        else { pong_xspeed -= 1; }
+    }
+}
+
 // Changes the angle of the pong if it hits edges of paddle.
 function adjustAngle(pong, paddle) {
     let distanceFromTop = pong.top - paddle.top;
@@ -152,25 +162,37 @@ function adjustAngle(pong, paddle) {
     }
 }
 
+// Adjust the direction of the paddle.
+// Absolute makes sure that it doesn't double bounce.
+function adjustDirection(direction) {
+    if (direction == "left")
+        pong_xspeed = Math.abs(pong_xspeed);
+    else { pong_xspeed = -Math.abs(pong_xspeed); }
+    paddle_bounces++;
+}
+
 // Checks for all the collisions in the game.
-function updateCollisions() {
+function checkCollisions() {
     let pong = {
         left : pong_xcoord,
         right: pong_xcoord + pong_size,
         top: pong_ycoord,
-        bottom: pong_ycoord + pong_size
+        bottom: pong_ycoord + pong_size,
+        moving: pong_xspeed > 0 ? "right" : "left"
     };
     let player = {
         left: player_xcoord,
         right: player_xcoord + paddle_width,
         top: player_ycoord,
-        bottom: player_ycoord + paddle_height
+        bottom: player_ycoord + paddle_height,
+        moving: "left"
     };
     let ai = {
         left: ai_xcoord,
         right: ai_xcoord + paddle_width,
         top: ai_ycoord,
-        bottom: ai_ycoord + paddle_height
+        bottom: ai_ycoord + paddle_height,
+        moving: "right"
     };
 
     // Check left and right of pong and screen.
@@ -187,33 +209,39 @@ function updateCollisions() {
         pong_yspeed *= -1;
     }
     // Check right of player paddle and left of pong.
-    // Absolute makes sure that it doesn't double bounce.
+    // Ignores if not moving in paddle's direction.
     else if (
+            pong.moving === player.moving &&
             pong.left < player.right && 
             pong.right > player.left &&
             pong.top < player.bottom &&
             pong.bottom > player.top
         ) {
         adjustAngle(pong, player);
-        pong_xspeed = -Math.abs(pong_xspeed);
+        adjustDirection(player.moving);
+        if (paddle_bounces % SPEED_INCREMENT_COUNTER == 0)
+            updatePongSpeed();
     }
     // Check left of AI paddle and right of pong.
-    // Absolute makes sure that it doesn't double bounce. 
+    // Ignores if not moving in paddle's direction.
     else if (
+            pong.moving === ai.moving &&
             pong.right > ai.left && 
             pong.left < ai.right && 
             pong.top < ai.bottom &&
             pong.bottom > ai.top
         ) {
         adjustAngle(pong, ai);
-        pong_xspeed = Math.abs(pong_xspeed);
+        adjustDirection(ai.moving);
+        if (paddle_bounces % SPEED_INCREMENT_COUNTER == 0)
+            updatePongSpeed();
     }
 }
 
 // The main loop of the program.
 function play() {
     moveAI();
-    updateCollisions();
+    checkCollisions();
     updateBall();
     redrawScreen();
     setTimeout(play, 30);
@@ -225,9 +253,9 @@ play();
 // Check for the player to use the keyboard keys (on the canvas element). 
 // When used, move the player.
 document.querySelector("html").addEventListener("keydown", e => {
-    if (e.key == "ArrowUp")
+    if (e.key == "ArrowUp" && !paused)
         movePlayerUp();
-    else if (e.key == "ArrowDown")
+    else if (e.key == "ArrowDown" && !paused)
         movePlayerDown();
     else if (e.key == "p") {
         if (paused) {
@@ -248,10 +276,11 @@ document.querySelector("html").addEventListener("keydown", e => {
 // Moves the player's paddle according to
 // where their mouse is located on the y-axis.
 document.querySelector("html").addEventListener("mousemove", e => {
+    if (!paused) {
     player_ycoord = e.y - canvas.offsetTop;
     if (player_ycoord < 0)
         player_ycoord = 0;
     else if (player_ycoord + paddle_height > height)
         player_ycoord = height - paddle_height;
-        
+    }
 });
