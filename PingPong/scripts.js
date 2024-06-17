@@ -35,6 +35,8 @@ prev_yspeed = pong_yspeed;
 const SPEED_INCREMENT_COUNTER = 5;
 let paddle_bounces = 0;
 
+let gameOver = false;
+
 function drawBackground() {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, width, height);
@@ -197,11 +199,17 @@ function checkCollisions() {
 
     // Check left and right of pong and screen.
     if (pong.left <= 0) {
-        ai_score++;
+        if (++ai_score > 4) {
+            gameOver = true;
+            return;
+        }
         resetPong();
     }
     else if (pong.right >= width) {
-        player_score++;
+        if (++player_score > 4) {
+            gameOver = true;
+            return;
+        }
         resetPong();
     }
     // Check top and bottom of pong and screen.
@@ -238,13 +246,23 @@ function checkCollisions() {
     }
 }
 
+function drawGameOver() {
+    ctx.textAlign = "center";
+    ctx.fillText("Game Over", width / 2, height / 2);
+    ctx.fill();
+}
+
 // The main loop of the program.
 function play() {
     moveAI();
     checkCollisions();
     updateBall();
     redrawScreen();
-    setTimeout(play, 30);
+    if (gameOver) {
+        redrawScreen();
+        drawGameOver();
+    }
+    else { setTimeout(play, 30); }
 }
 // Start of program
 drawPong(pong_size);
