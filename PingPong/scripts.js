@@ -9,17 +9,17 @@ let height = canvas.height;
 const paddle_width = 10;
 const paddle_height = 50;
 const player_xcoord = 35;
-const ai_xcoord = width - 35;
+const ai_xcoord = width - paddle_width - 35;
 
 let player_ycoord = (height / 2) - (paddle_height / 2);
 let ai_ycoord = (height / 2) - (paddle_height / 2);
-let ai_speed = 5;
+let ai_speed = 8;
 
 let pong_size = 10;
 let pong_xcoord = width / 2 - pong_size / 2;
 let pong_ycoord = height / 2 - pong_size / 2;
-let pong_xspeed = 2;
-let pong_yspeed = 4;
+let pong_xspeed = 4;
+let pong_yspeed = 6;
 
 let player_score = 0;
 let ai_score = 0;
@@ -37,22 +37,45 @@ let paddle_bounces = 0;
 
 let gameOver = false;
 
+// Pauses the game by stopping the pong.
+function pauseGame() {
+    if (paused) {
+        paused = false;
+        pong_xspeed = prev_xspeed;
+        pong_yspeed = prev_yspeed;
+    }
+    else {
+        paused = true;
+        prev_xspeed = pong_xspeed;
+        prev_yspeed = pong_yspeed
+        pong_xspeed = 0;
+        pong_yspeed = 0;
+    }
+}
+
 function drawBackground() {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, width, height);
+}
+
+function drawStartScreen() {
+    ctx.font = "100px monospace";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.fillText("PONG", width/2, height/2);
+    ctx.font = "22px monospace";
+    ctx.fillText("CLICK TO BEGIN", width/2, height/2 + 50);
     ctx.fill();
 }
 
 function drawPlayer(size=player_height) {
     ctx.fillStyle = "red";
     ctx.fillRect(player_xcoord, player_ycoord, paddle_width, size);
-    ctx.fill();
 }
 
 function drawAI() {
     ctx.fillStyle = "blue";
     ctx.fillRect(ai_xcoord, ai_ycoord, paddle_width, paddle_height);
-    ctx.fill();
 }
 
 function drawPong(size=pong_size) {
@@ -69,7 +92,6 @@ function drawScore() {
     ctx.fillText(player_score.toString(), 50, 50);
     ctx.textAlign = "right";
     ctx.fillText(ai_score.toString(), width - 50, 50);
-    ctx.fill();
 }
 
 // Updates position of the ball. Currently, it begins by moving bottom-right. 
@@ -78,16 +100,17 @@ function updateBall() {
     pong_ycoord += pong_yspeed;
 }
 
-// Calls the draw functions.
-function redrawScreen() {
+// Calls the draw functions and fills them in.
+async function redrawScreen() {
     drawBackground();
     drawPlayer(paddle_height);
     drawAI();
     drawPong();
     drawScore();
+    ctx.fill();
 }
 
-// Resets the coordinates and speed of the ping pong for a new game.
+// Pauses and resets the coordinates and speed of the ping pong for a new game.
 function resetPong() {
     pong_xcoord = reset_xpoint;
     pong_ycoord = reset_ypoint;
@@ -149,6 +172,10 @@ function updatePongSpeed() {
         if (pong_xspeed > 0) 
             pong_xspeed += 1;
         else { pong_xspeed -= 1; }
+
+        if (pong_yspeed > 0)
+            pong_yspeed += 1;
+        else { pong_yspeed -= 1; }
     }
 }
 
@@ -175,6 +202,8 @@ function adjustDirection(direction) {
 
 // Checks for all the collisions in the game.
 function checkCollisions() {
+    if (paused) 
+        return;
     let pong = {
         left : pong_xcoord,
         right: pong_xcoord + pong_size,
@@ -201,16 +230,23 @@ function checkCollisions() {
     if (pong.left <= 0) {
         if (++ai_score > 4) {
             gameOver = true;
-            return;
         }
-        resetPong();
+        pauseGame();
+        setTimeout(() => {
+            pauseGame();
+            resetPong();
+        }, 1000);
     }
     else if (pong.right >= width) {
         if (++player_score > 4) {
             gameOver = true;
-            return;
         }
-        resetPong();
+        pauseGame();
+        setTimeout(() => {
+            pauseGame();
+            resetPong();
+        }, 1000);
+
     }
     // Check top and bottom of pong and screen.
     else if (pong.top <= 0 || pong.bottom >= height) {
@@ -252,17 +288,24 @@ function drawGameOver() {
     ctx.fill();
 }
 
+let beginGame = false;
 // The main loop of the program.
 function play() {
-    moveAI();
-    checkCollisions();
-    updateBall();
-    redrawScreen();
+    if (!beginGame) {
+        drawBackground();
+        drawStartScreen();
+    }
+    else {
+        moveAI();
+        checkCollisions();
+        updateBall();
+        redrawScreen();
+    }
     if (gameOver) {
         redrawScreen();
         drawGameOver();
     }
-    else { setTimeout(play, 30); }
+    else { requestAnimationFrame(play) }
 }
 // Start of program
 drawPong(pong_size);
@@ -275,20 +318,19 @@ document.querySelector("html").addEventListener("keydown", e => {
         movePlayerUp();
     else if (e.key == "ArrowDown" && !paused)
         movePlayerDown();
-    else if (e.key == "p") {
-        if (paused) {
-            paused = false;
-            pong_xspeed = prev_xspeed;
-            pong_yspeed = prev_yspeed;
-        }
-        else { 
-            paused = true; 
-            prev_xspeed = pong_xspeed;
-            prev_yspeed = pong_yspeed
-            pong_xspeed = 0;
-            pong_yspeed = 0;
-        }
-    }   
+    else if (e.key == "p")
+        pauseGame();
+});
+
+// Allows the game to start when clicked
+document.querySelector("html").addEventListener("mousedown", e => {
+    if (!beginGame) {
+        beginGame = true;
+        pauseGame();
+        setTimeout(() => {
+            pauseGame();
+        }, 1000);
+    }
 });
 
 // Moves the player's paddle according to
