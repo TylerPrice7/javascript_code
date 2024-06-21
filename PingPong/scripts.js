@@ -1,5 +1,3 @@
-// All of the declarations will need to be cleaned up before completion.
-
 let canvas = document.querySelector("#canvas");
 let ctx = canvas.getContext("2d");
 
@@ -23,6 +21,7 @@ let pong_yspeed = 6;
 
 let player_score = 0;
 let ai_score = 0;
+const MAX_SCORE = 5;
 const reset_xpoint = pong_xcoord;
 const reset_ypoint = pong_ycoord;
 const reset_xspeed = pong_xspeed;
@@ -79,7 +78,7 @@ function drawAI() {
 }
 
 function drawPong(size=pong_size) {
-    ctx.fillStyle = "yellow";
+    ctx.fillStyle = "white";
     ctx.fillRect(pong_xcoord, pong_ycoord, size, size);
 }
 
@@ -88,6 +87,7 @@ function drawPong(size=pong_size) {
 // so it will copy whatever fillStyle is currently enabled.
 function drawScore() {
     ctx.font = "30px monospace";
+    ctx.fillStyle = "yellow";
     ctx.textAlign = "left";
     ctx.fillText(player_score.toString(), 50, 50);
     ctx.textAlign = "right";
@@ -228,7 +228,7 @@ function checkCollisions() {
 
     // Check left and right of pong and screen.
     if (pong.left <= 0) {
-        if (++ai_score > 4) {
+        if (++ai_score >= MAX_SCORE) {
             gameOver = true;
         }
         pauseGame();
@@ -238,7 +238,7 @@ function checkCollisions() {
         }, 1000);
     }
     else if (pong.right >= width) {
-        if (++player_score > 4) {
+        if (++player_score >= MAX_SCORE) {
             gameOver = true;
         }
         pauseGame();
@@ -283,31 +283,43 @@ function checkCollisions() {
 }
 
 function drawGameOver() {
+    ctx.font = "48px monospace";
+    ctx.fillStyle = "white";
     ctx.textAlign = "center";
-    ctx.fillText("Game Over", width / 2, height / 2);
+    if (ai_score > player_score)
+        ctx.fillText("GAME OVER", width / 2, height / 2);
+    else {
+        ctx.fillText("YOU WIN!", width / 2, height / 2);
+    }
+    ctx.font = "20px monospace";
+    ctx.fillText("Press Here To Continue", width / 2, height / 1.4);
     ctx.fill();
 }
 
-let beginGame = false;
+
+
 // The main loop of the program.
 function play() {
     if (!beginGame) {
         drawBackground();
         drawStartScreen();
+        requestAnimationFrame(play);
+    }
+    else if (gameOver) {
+        redrawScreen();
+        drawGameOver();
     }
     else {
         moveAI();
         checkCollisions();
         updateBall();
         redrawScreen();
+        requestAnimationFrame(play);
     }
-    if (gameOver) {
-        redrawScreen();
-        drawGameOver();
-    }
-    else { requestAnimationFrame(play) }
 }
 // Start of program
+let beginGame = false;
+pauseGame();
 drawPong(pong_size);
 play();
 
@@ -322,14 +334,37 @@ document.querySelector("html").addEventListener("keydown", e => {
         pauseGame();
 });
 
+// Sets the appropriate booleans to false and resets scores.
+function restartGame() {
+    pauseGame();
+    gameOver = false;
+    beginGame = false;
+    player_score = 0;
+    ai_score = 0;
+    player_ycoord = reset_ypoint;
+    ai_ycoord = reset_ypoint;
+}
+
+
 // Allows the game to start when clicked
 document.querySelector("html").addEventListener("mousedown", e => {
     if (!beginGame) {
         beginGame = true;
-        pauseGame();
         setTimeout(() => {
             pauseGame();
         }, 1000);
+    }
+    // Restarts the game when clicked.
+    if (gameOver) {
+        mouse_ycoord = e.y - canvas.offsetTop;
+        mouse_xcoord = e.x;
+        if (mouse_xcoord > width / 5.5 && mouse_xcoord < width / 1.15 &&
+            mouse_ycoord > height / 1.5 && mouse_ycoord < height / 1.35) {
+                restartGame();
+                requestAnimationFrame(play);
+            }
+            //ctx.fillText("Press Here To Continue", width / 2, height / 1.4);
+
     }
 });
 
@@ -337,10 +372,10 @@ document.querySelector("html").addEventListener("mousedown", e => {
 // where their mouse is located on the y-axis.
 document.querySelector("html").addEventListener("mousemove", e => {
     if (!paused) {
-    player_ycoord = e.y - canvas.offsetTop;
-    if (player_ycoord < 0)
-        player_ycoord = 0;
-    else if (player_ycoord + paddle_height > height)
-        player_ycoord = height - paddle_height;
+        player_ycoord = e.y - canvas.offsetTop;
+        if (player_ycoord < 0)
+            player_ycoord = 0;
+        else if (player_ycoord + paddle_height > height)
+            player_ycoord = height - paddle_height;
     }
 });
