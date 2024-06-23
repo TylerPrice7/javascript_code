@@ -25,8 +25,8 @@ let ai_speed = 8;
 let pong_size = 10;
 let pong_xcoord = canvas.width / 2 - pong_size / 2;
 let pong_ycoord = canvas.height / 2 - pong_size / 2;
-let pong_xspeed = 2;
-let pong_yspeed = 4;
+let pong_xspeed = 4;
+let pong_yspeed = 6;
 
 let player_score = 0;
 let ai_score = 0;
