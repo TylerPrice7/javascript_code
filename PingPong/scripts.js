@@ -87,7 +87,7 @@ function drawAI() {
 }
 
 function drawPong(size=pong_size) {
-    ctx.fillStyle = "yellow";
+    ctx.fillStyle = "white";
     if (pong_xcoord < game_xcoord)
         ctx.fillRect(game_xcoord, pong_ycoord, size, size);
     else if (pong_xcoord > game_xcoord + game_width)
