@@ -19,6 +19,8 @@ const player_xcoord = game_xcoord + 35;
 const ai_xcoord = game_xcoord + game_width - paddle_width - 35;
 
 let player_ycoord = (canvas.height / 2) - (paddle_height / 2);
+let mouse_pos = 0;
+const MAX_FRAME_MOVEMENT = 10;
 let ai_ycoord = player_ycoord;
 let ai_speed = 8;
 
@@ -151,6 +153,26 @@ function movePlayerDown() {
         return;
     player_ycoord += 10;
     if (player_ycoord + paddle_height >= game_ycoord + game_height)
+        player_ycoord = game_ycoord + game_height - paddle_height;
+}
+
+// Moves the player depending where their mouse is.
+function movePlayer() {
+    if (paused)
+        return;
+    let player = {
+        top: player_ycoord,
+        bottom: player_ycoord + paddle_height
+    };
+    // Whenever the updateBall function is changed, this statement needs to be adjusted.
+    if (mouse_pos < player.top - MAX_FRAME_MOVEMENT) {
+        player_ycoord -= MAX_FRAME_MOVEMENT;
+      } else if (mouse_pos > player.top + MAX_FRAME_MOVEMENT) {
+        player_ycoord += MAX_FRAME_MOVEMENT;
+      }
+    if (player.top < game_ycoord)
+        player_ycoord = game_ycoord;
+    else if (player.bottom > game_ycoord + game_height)
         player_ycoord = game_ycoord + game_height - paddle_height;
 }
 
@@ -337,6 +359,7 @@ function play() {
     }
     else {
         moveAI();
+        movePlayer();
         checkCollisions();
         updateBall();
         redrawScreen();
@@ -380,14 +403,9 @@ document.querySelector("html").addEventListener("mousedown", e => {
     }
 });
 
-// Moves the player's paddle according to
-// where their mouse is located on the y-axis.
+// Sets the mouse posiiton whenever it moves.
 document.querySelector("html").addEventListener("mousemove", e => {
-    if (!paused) {
-        player_ycoord = e.y - canvas.offsetTop;
-        if (player_ycoord < game_ycoord)
-            player_ycoord = game_ycoord;
-        else if (player_ycoord + paddle_height > game_ycoord + game_height)
-            player_ycoord = game_ycoord + game_height - paddle_height;
-    }
+        mouse_pos = e.y - canvas.offsetTop;
 });
+
+
