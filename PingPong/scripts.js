@@ -27,8 +27,8 @@ let ai_speed = 8;
 let pong_size = 10;
 let pong_xcoord = canvas.width / 2 - pong_size / 2;
 let pong_ycoord = canvas.height / 2 - pong_size / 2;
-let pong_xspeed = 4;
-let pong_yspeed = 6;
+let pong_xspeed = 3;
+let pong_yspeed = 4;
 
 let player_score = 0;
 let ai_score = 0;
@@ -80,6 +80,10 @@ function drawStartScreen() {
 
 function drawPlayer(size=paddle_height) {
     ctx.fillStyle = "red";
+    if (player_ycoord < game_ycoord)
+        player_ycoord = game_ycoord;
+    else if (player_ycoord + paddle_height > game_ycoord + game_height)
+        player_ycoord = game_ycoord + game_height - paddle_height;
     ctx.fillRect(player_xcoord, player_ycoord, paddle_width, size);
 }
 
@@ -209,12 +213,12 @@ function updatePongSpeed() {
         return;
     if (paddle_bounces % SPEED_INCREMENT_COUNTER == 0 ) {
         if (pong_xspeed > 0) 
-            pong_xspeed += 1;
-        else { pong_xspeed -= 1; }
+            pong_xspeed += .5;
+        else { pong_xspeed -= .5; }
 
         if (pong_yspeed > 0)
-            pong_yspeed += 1;
-        else { pong_yspeed -= 1; }
+            pong_yspeed += .5;
+        else { pong_yspeed -= .5; }
     }
 }
 
@@ -390,6 +394,7 @@ document.querySelector("html").addEventListener("mousedown", e => {
         setTimeout(() => {
             pauseGame();
         }, 1000);
+        mouse_pos = e.y - canvas.offsetTop - paddle_height / 2;
     }
     // Restarts the game when clicked.
     if (gameOver) {
@@ -405,7 +410,5 @@ document.querySelector("html").addEventListener("mousedown", e => {
 
 // Sets the mouse posiiton whenever it moves.
 document.querySelector("html").addEventListener("mousemove", e => {
-        mouse_pos = e.y - canvas.offsetTop;
+        mouse_pos = e.y - canvas.offsetTop - paddle_height / 2;
 });
-
-
