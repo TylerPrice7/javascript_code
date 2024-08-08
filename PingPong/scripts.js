@@ -163,21 +163,47 @@ function redrawScreen() {
     drawPong();
     drawSlowPong();
     drawScore();
-    //ctx.fill();
 }
 
 // Pauses and resets the coordinates and speed of the ping pong for a new game.
-// TODO: Randomly chooses the direction the pong originally shoots.
+// Randomly chooses the direction the pong originally shoots.
+// The direction chosen is as follows:
+// < 0.25, bottom left. < 0.50, top left. < 0.75, top right. > 0.75, bottom right.
 function resetPong() {
-
+    let basic_pong_direction = Math.random();
     pong_xcoord = reset_xpoint;
     pong_ycoord = reset_ypoint;
     pong_xspeed = reset_xspeed;
     pong_yspeed = reset_yspeed;
+    if (basic_pong_direction > 0.75)
+       ; // No action needed.
+    else if (basic_pong_direction > 0.5)
+        pong_yspeed *= -1;
+    else if (basic_pong_direction > 0.25) {
+        pong_xspeed *= -1;
+        pong_yspeed *= -1;
+    }
+    else { pong_xspeed *= -1; }
+
+    let slow_pong_direction = Math.random();
     slow_pong_xcoord = reset_slow_xpoint;
     slow_pong_ycoord = reset_slow_ypoint;
     slow_pong_xspeed = reset_slow_xspeed;
     slow_pong_yspeed = reset_slow_yspeed;
+    if (slow_pong_direction > 0.75)
+        ; // No action needed.
+    else if (slow_pong_direction > 0.5) {
+        console.log(`${slow_pong_direction} in use`);
+        console.log(`${slow_pong_yspeed}`);
+        slow_pong_yspeed *= -1;
+        console.log(`${slow_pong_yspeed}`);
+    }
+    else if (slow_pong_direction > 0.25) {
+        slow_pong_xspeed *= -1;
+        slow_pong_yspeed *= -1;
+    }
+    else { slow_pong_xspeed *= -1; }
+    console.log(`${basic_pong_direction} and ${slow_pong_direction}`);
 }
 
 // For keyboard presses.
@@ -200,8 +226,6 @@ function movePlayerDown() {
 
 // Moves the player depending where their mouse is.
 function movePlayer() {
-    if (paused)
-        return;
     let player = {
         top: player_ycoord,
         bottom: player_ycoord + paddle_height
@@ -236,7 +260,7 @@ function moveAI() {
     };
     // Whenever the updatePong function is changed, this statement needs to be adjusted.
     // Do not move paddle if pong is not moving in its direction.
-    if ((pong_xspeed < 0 && slow_pong_xspeed < 0) || paused)
+    if (pong_xspeed < 0 && slow_pong_xspeed < 0)
         return;
     // AI checks which pong is moving it its direction and directs attention 
     // toward the one that is closest to the paddle.
@@ -307,8 +331,6 @@ function adjustDirection(direction, pong_type) {
 
 // Checks for all the collisions in the game.
 function checkCollisions() {
-    if (paused) 
-        return;
     let pong = {
         left : pong_xcoord,
         right: pong_xcoord + pong_size,
@@ -462,19 +484,23 @@ function play() {
         drawGameOver();
     }
     else {
-        moveAI();
-        movePlayer();
-        checkCollisions();
-        updatePong();
+        if (!paused) {
+            moveAI();
+            movePlayer();
+            checkCollisions();
+            updatePong();
+        }
         redrawScreen();
         requestAnimationFrame(play);
     }
 }
 // Start of program
 let beginGame = false;
-pauseGame();
 drawPong(pong_size);
 drawSlowPong(slow_pong_size);
+resetPong();
+pauseGame();
+//console.log(`${pong_yspeed} and ${slow_pong_yspeed}`);
 play();
 
 // Check for the player to use the keyboard keys (on the canvas element). 
