@@ -48,7 +48,6 @@ const reset_slow_ypoint = slow_pong_ycoord;
 const reset_slow_xspeed = slow_pong_xspeed;
 const reset_slow_yspeed = slow_pong_yspeed;
 
-
 let paused = false;
 let prev_xspeed = pong_xspeed;
 let prev_yspeed = pong_yspeed;
@@ -67,12 +66,12 @@ function pauseGame() {
         pong_xspeed = prev_xspeed;
         pong_yspeed = prev_yspeed;
         slow_pong_xspeed = prev_slow_xspeed;
-        slow_pong_xspeed = prev_slow_xspeed;
+        slow_pong_yspeed = prev_slow_yspeed;
     }
     else {
         paused = true;
         prev_xspeed = pong_xspeed;
-        prev_yspeed = pong_yspeed
+        prev_yspeed = pong_yspeed;
         prev_slow_xspeed = slow_pong_xspeed;
         prev_slow_yspeed = slow_pong_yspeed;
         pong_xspeed = 0;
@@ -224,20 +223,36 @@ function movePlayer() {
 function moveAI() {
     let pong = {
         top: pong_ycoord,
-        bottom: pong_ycoord + pong_size
+        bottom: pong_ycoord + pong_size,
+        right: pong_xcoord + pong_size
+    };
+    let slow_pong = {
+        top: slow_pong_ycoord,
+        bottom: slow_pong_ycoord + slow_pong_size,
+        right: slow_pong_xcoord + slow_pong_size
     };
     let ai = {
         top: ai_ycoord,
-        bottom: ai_ycoord + paddle_height
+        bottom: ai_ycoord + paddle_height,
     };
     // Whenever the updateBall function is changed, this statement needs to be adjusted.
-    if (pong_xspeed < 0 || paused)
+    // Do not move paddle if pong is not moving in its direction.
+    if ((pong_xspeed < 0 && slow_pong_xspeed < 0) || paused)
         return;
-    else if (pong.top <= ai.top)
-        ai_ycoord -= ai_speed;
-
-    else if (pong.bottom >= ai.bottom)
-        ai_ycoord += ai_speed;
+    // AI checks which pong is moving it its direction and directs attention 
+    // toward the one that is closest to the paddle.
+    if (slow_pong_xspeed < 0 || pong.right > slow_pong.right) {
+        if (pong.top <= ai.top)
+            ai_ycoord -= ai_speed;
+        else if (pong.bottom >= ai.bottom)
+            ai_ycoord += ai_speed;
+    }
+    if (pong_xspeed < 0 || pong.right < slow_pong.right) {
+        if (slow_pong.top <= ai.top)
+            ai_ycoord -= ai_speed;
+        else if (slow_pong.bottom >= ai.bottom)
+            ai_ycoord += ai_speed;
+    }
 
     // Make sure the AI does not go above or below the game.
     if (ai_ycoord < game_ycoord)
@@ -335,7 +350,7 @@ function checkCollisions() {
             resetPong();
         }, 1000);
     }
-    else if (pong.right >= game_xcoord + game_width || 
+    if (pong.right >= game_xcoord + game_width || 
              slow_pong.right >= game_xcoord + game_width) {
         if (++player_score >= MAX_SCORE) {
             gameOver = true;
@@ -348,16 +363,16 @@ function checkCollisions() {
 
     }
     // Check top and bottom of normal pong and screen.
-    else if (pong.top <= game_ycoord || pong.bottom >= game_ycoord + game_height) {
+    if (pong.top <= game_ycoord || pong.bottom >= game_ycoord + game_height) {
         pong_yspeed *= -1;
     }
     // Check top and bottom of slow pong and screen.
-    else if (slow_pong.top <= game_ycoord || slow_pong.bottom >= game_ycoord + game_height) {
+    if (slow_pong.top <= game_ycoord || slow_pong.bottom >= game_ycoord + game_height) {
         slow_pong_yspeed *= -1;
     }
     // Check right of player paddle and left of pong.
     // Ignores if not moving in paddle's direction.
-    else if (
+    if (
             pong.moving === player.moving &&
             pong.left < player.right && 
             pong.right > player.left &&
@@ -370,7 +385,7 @@ function checkCollisions() {
             updatePongSpeed();
     }
     // Checks right of player paddle and left of the slower pong.
-    else if (
+    if (
         slow_pong.moving === player.moving &&
         slow_pong.left < player.right && 
         slow_pong.right > player.left &&
@@ -383,7 +398,7 @@ function checkCollisions() {
 
     // Check left of AI paddle and right of pong.
     // Ignores if not moving in paddle's direction.
-    else if (
+    if (
             pong.moving === ai.moving &&
             pong.right > ai.left && 
             pong.left < ai.right && 
@@ -397,7 +412,7 @@ function checkCollisions() {
     }
     // Checks right of AI paddle and right of slower pong.
     // Ignores if not moving in paddle's direction.
-    else if (
+    if (
         slow_pong.moving === ai.moving &&
         slow_pong.right > ai.left && 
         slow_pong.left < ai.right && 
