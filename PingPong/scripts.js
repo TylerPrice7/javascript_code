@@ -25,10 +25,16 @@ let ai_ycoord = player_ycoord;
 let ai_speed = 8;
 
 let pong_size = 10;
-let pong_xcoord = canvas.width / 2 - pong_size / 2;
-let pong_ycoord = canvas.height / 2 - pong_size / 2;
+let pong_xcoord = (canvas.width / 2) - (pong_size / 2);
+let pong_ycoord = (canvas.height / 2) - (pong_size / 2);
 let pong_xspeed = 3;
 let pong_yspeed = 4;
+
+const slow_pong_size = 15;
+let slow_pong_xcoord = (canvas.width / 2) - (slow_pong_size / 2);
+let slow_pong_ycoord = (canvas.height / 2) - (slow_pong_size / 2);
+let slow_pong_xspeed = 1;
+let slow_pong_yspeed = 2;
 
 let player_score = 0;
 let ai_score = 0;
@@ -37,10 +43,17 @@ const reset_xpoint = pong_xcoord;
 const reset_ypoint = pong_ycoord;
 const reset_xspeed = pong_xspeed;
 const reset_yspeed = pong_yspeed;
+const reset_slow_xpoint = slow_pong_xcoord;
+const reset_slow_ypoint = slow_pong_ycoord;
+const reset_slow_xspeed = slow_pong_xspeed;
+const reset_slow_yspeed = slow_pong_yspeed;
 
-paused = false;
-prev_xspeed = pong_xspeed;
-prev_yspeed = pong_yspeed;
+
+let paused = false;
+let prev_xspeed = pong_xspeed;
+let prev_yspeed = pong_yspeed;
+let prev_slow_xspeed = slow_pong_xspeed;
+let prev_slow_yspeed = slow_pong_yspeed;
 
 const SPEED_INCREMENT_COUNTER = 5;
 let paddle_bounces = 0;
@@ -53,13 +66,19 @@ function pauseGame() {
         paused = false;
         pong_xspeed = prev_xspeed;
         pong_yspeed = prev_yspeed;
+        slow_pong_xspeed = prev_slow_xspeed;
+        slow_pong_xspeed = prev_slow_xspeed;
     }
     else {
         paused = true;
         prev_xspeed = pong_xspeed;
         prev_yspeed = pong_yspeed
+        prev_slow_xspeed = slow_pong_xspeed;
+        prev_slow_yspeed = slow_pong_yspeed;
         pong_xspeed = 0;
         pong_yspeed = 0;
+        slow_pong_xspeed = 0;
+        slow_pong_yspeed = 0;
     }
 }
 
@@ -106,6 +125,20 @@ function drawPong(size=pong_size) {
     else { ctx.fillRect(pong_xcoord, pong_ycoord, size, size) }; 
 }
 
+function drawSlowPong(size=slow_pong_size) {
+    ctx.fillStyle = "white";
+    if (slow_pong_xcoord < game_xcoord)
+        ctx.fillRect(game_xcoord, slow_pong_ycoord, size, size);
+    else if (slow_pong_xcoord > game_xcoord + game_width)
+        ctx.fillRect(game_xcoord + game_width - slow_pong_size, slow_pong_ycoord, size, size);
+    else if (slow_pong_ycoord < game_ycoord)
+        ctx.fillRect(slow_pong_xcoord, game_ycoord, size, size);
+    else if (slow_pong_ycoord + size > game_ycoord + game_height)
+        ctx.fillRect(slow_pong_xcoord, game_ycoord + game_height - size, size, size);
+    
+    else { ctx.fillRect(slow_pong_xcoord, slow_pong_ycoord, size, size)};
+}
+
 // Displays the current score. 
 // Note that drawScore does not have a fillStyle,
 // so it will copy whatever fillStyle is currently enabled.
@@ -122,6 +155,8 @@ function drawScore() {
 function updateBall() {
     pong_xcoord += pong_xspeed;
     pong_ycoord += pong_yspeed;
+    slow_pong_xcoord += slow_pong_xspeed;
+    slow_pong_ycoord += slow_pong_yspeed;
 }
 
 // Calls the draw functions and fills them in.
@@ -130,6 +165,7 @@ function redrawScreen() {
     drawPlayer(paddle_height);
     drawAI();
     drawPong();
+    drawSlowPong();
     drawScore();
     ctx.fill();
 }
@@ -140,6 +176,10 @@ function resetPong() {
     pong_ycoord = reset_ypoint;
     pong_xspeed = reset_xspeed;
     pong_yspeed = reset_yspeed;
+    slow_pong_xcoord = reset_slow_xpoint;
+    slow_pong_ycoord = reset_slow_ypoint;
+    slow_pong_xspeed = reset_slow_xspeed;
+    slow_pong_yspeed = reset_slow_yspeed;
 }
 
 // For keyboard presses.
@@ -236,11 +276,19 @@ function adjustAngle(pong, paddle) {
 
 // Adjust the direction of the paddle.
 // Absolute makes sure that it doesn't double bounce.
-function adjustDirection(direction) {
-    if (direction == "left")
-        pong_xspeed = Math.abs(pong_xspeed);
-    else { pong_xspeed = -Math.abs(pong_xspeed); }
-    paddle_bounces++;
+function adjustDirection(direction, pong_type) {
+    if (direction == "left") {
+        if (pong_type == "basic")
+            pong_xspeed = Math.abs(pong_xspeed);
+        else { slow_pong_xspeed = Math.abs(slow_pong_xspeed); }
+    }
+    else {
+        if (pong_type == "basic")
+            pong_xspeed = -Math.abs(pong_xspeed);
+        else { slow_pong_xspeed = -Math.abs(slow_pong_xspeed); }
+    }
+    if (pong_type == "basic")
+        paddle_bounces++;
 }
 
 // Checks for all the collisions in the game.
@@ -252,6 +300,13 @@ function checkCollisions() {
         right: pong_xcoord + pong_size,
         top: pong_ycoord,
         bottom: pong_ycoord + pong_size,
+        moving: pong_xspeed > 0 ? "right" : "left"
+    };
+    let slow_pong = {
+        left : slow_pong_xcoord,
+        right: slow_pong_xcoord + slow_pong_size,
+        top: slow_pong_ycoord,
+        bottom: slow_pong_ycoord + slow_pong_size,
         moving: pong_xspeed > 0 ? "right" : "left"
     };
     let player = {
@@ -269,8 +324,8 @@ function checkCollisions() {
         moving: "right"
     };
 
-    // Check left and right of pong and screen.
-    if (pong.left <= game_xcoord) {
+    // Check left and right of both pongs and screen.
+    if (pong.left <= game_xcoord || slow_pong.left <= game_xcoord) {
         if (++ai_score >= MAX_SCORE) {
             gameOver = true;
         }
@@ -280,7 +335,8 @@ function checkCollisions() {
             resetPong();
         }, 1000);
     }
-    else if (pong.right >= game_xcoord + game_width) {
+    else if (pong.right >= game_xcoord + game_width || 
+             slow_pong.right >= game_xcoord + game_width) {
         if (++player_score >= MAX_SCORE) {
             gameOver = true;
         }
@@ -291,9 +347,13 @@ function checkCollisions() {
         }, 1000);
 
     }
-    // Check top and bottom of pong and screen.
+    // Check top and bottom of normal pong and screen.
     else if (pong.top <= game_ycoord || pong.bottom >= game_ycoord + game_height) {
         pong_yspeed *= -1;
+    }
+    // Check top and bottom of slow pong and screen.
+    else if (slow_pong.top <= game_ycoord || slow_pong.bottom >= game_ycoord + game_height) {
+        slow_pong_yspeed *= -1;
     }
     // Check right of player paddle and left of pong.
     // Ignores if not moving in paddle's direction.
@@ -305,10 +365,22 @@ function checkCollisions() {
             pong.bottom > player.top
         ) {
         adjustAngle(pong, player);
-        adjustDirection(player.moving);
+        adjustDirection(player.moving, "basic");
         if (paddle_bounces % SPEED_INCREMENT_COUNTER == 0)
             updatePongSpeed();
     }
+    // Checks right of player paddle and left of the slower pong.
+    else if (
+        slow_pong.moving === player.moving &&
+        slow_pong.left < player.right && 
+        slow_pong.right > player.left &&
+        slow_pong.top < player.bottom &&
+       slow_pong.bottom > player.top
+    ) {
+        adjustAngle(pong, player);
+        adjustDirection(player.moving, "slow");
+    }
+
     // Check left of AI paddle and right of pong.
     // Ignores if not moving in paddle's direction.
     else if (
@@ -319,9 +391,21 @@ function checkCollisions() {
             pong.bottom > ai.top
         ) {
         adjustAngle(pong, ai);
-        adjustDirection(ai.moving);
+        adjustDirection(ai.moving, "basic");
         if (paddle_bounces % SPEED_INCREMENT_COUNTER == 0)
             updatePongSpeed();
+    }
+    // Checks right of AI paddle and right of slower pong.
+    // Ignores if not moving in paddle's direction.
+    else if (
+        slow_pong.moving === ai.moving &&
+        slow_pong.right > ai.left && 
+        slow_pong.left < ai.right && 
+        slow_pong.top < ai.bottom &&
+        slow_pong.bottom > ai.top
+    ) {
+        adjustAngle(slow_pong, ai);
+        adjustDirection(ai.moving, "slow");
     }
 }
 
@@ -374,6 +458,7 @@ function play() {
 let beginGame = false;
 pauseGame();
 drawPong(pong_size);
+drawSlowPong(slow_pong_size);
 play();
 
 // Check for the player to use the keyboard keys (on the canvas element). 
