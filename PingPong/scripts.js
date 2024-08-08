@@ -93,7 +93,6 @@ function drawStartScreen() {
     ctx.fillText("PONG", canvas.width/2, game_ycoord + game_height/2);
     ctx.font = "22px monospace";
     ctx.fillText("CLICK TO BEGIN", canvas.width/2, game_ycoord + game_height/2 + 50);
-    ctx.fill();
 }
 
 function drawPlayer(size=paddle_height) {
@@ -139,8 +138,6 @@ function drawSlowPong(size=slow_pong_size) {
 }
 
 // Displays the current score. 
-// Note that drawScore does not have a fillStyle,
-// so it will copy whatever fillStyle is currently enabled.
 function drawScore() {
     ctx.font = "30px monospace";
     ctx.fillStyle = "yellow";
@@ -166,7 +163,7 @@ function redrawScreen() {
     drawPong();
     drawSlowPong();
     drawScore();
-    ctx.fill();
+    //ctx.fill();
 }
 
 // Pauses and resets the coordinates and speed of the ping pong for a new game.
