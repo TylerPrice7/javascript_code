@@ -151,7 +151,7 @@ function drawScore() {
 }
 
 // Updates position of the ball. Currently, it begins by moving bottom-right. 
-function updateBall() {
+function updatePong() {
     pong_xcoord += pong_xspeed;
     pong_ycoord += pong_yspeed;
     slow_pong_xcoord += slow_pong_xspeed;
@@ -170,7 +170,9 @@ function redrawScreen() {
 }
 
 // Pauses and resets the coordinates and speed of the ping pong for a new game.
+// TODO: Randomly chooses the direction the pong originally shoots.
 function resetPong() {
+
     pong_xcoord = reset_xpoint;
     pong_ycoord = reset_ypoint;
     pong_xspeed = reset_xspeed;
@@ -207,7 +209,7 @@ function movePlayer() {
         top: player_ycoord,
         bottom: player_ycoord + paddle_height
     };
-    // Whenever the updateBall function is changed, this statement needs to be adjusted.
+    // Whenever the updatePong function is changed, this statement needs to be adjusted.
     if (mouse_pos < player.top - MAX_FRAME_MOVEMENT) {
         player_ycoord -= MAX_FRAME_MOVEMENT;
       } else if (mouse_pos > player.top + MAX_FRAME_MOVEMENT) {
@@ -235,7 +237,7 @@ function moveAI() {
         top: ai_ycoord,
         bottom: ai_ycoord + paddle_height,
     };
-    // Whenever the updateBall function is changed, this statement needs to be adjusted.
+    // Whenever the updatePong function is changed, this statement needs to be adjusted.
     // Do not move paddle if pong is not moving in its direction.
     if ((pong_xspeed < 0 && slow_pong_xspeed < 0) || paused)
         return;
@@ -340,6 +342,7 @@ function checkCollisions() {
     };
 
     // Check left and right of both pongs and screen.
+    // If true, add a point and reset the pong location.
     if (pong.left <= game_xcoord || slow_pong.left <= game_xcoord) {
         if (++ai_score >= MAX_SCORE) {
             gameOver = true;
@@ -348,6 +351,7 @@ function checkCollisions() {
         setTimeout(() => {
             pauseGame();
             resetPong();
+            // TODO: resetPaddle();
         }, 1000);
     }
     if (pong.right >= game_xcoord + game_width || 
@@ -464,7 +468,7 @@ function play() {
         moveAI();
         movePlayer();
         checkCollisions();
-        updateBall();
+        updatePong();
         redrawScreen();
         requestAnimationFrame(play);
     }
