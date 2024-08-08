@@ -192,18 +192,13 @@ function resetPong() {
     slow_pong_yspeed = reset_slow_yspeed;
     if (slow_pong_direction > 0.75)
         ; // No action needed.
-    else if (slow_pong_direction > 0.5) {
-        console.log(`${slow_pong_direction} in use`);
-        console.log(`${slow_pong_yspeed}`);
+    else if (slow_pong_direction > 0.5)
         slow_pong_yspeed *= -1;
-        console.log(`${slow_pong_yspeed}`);
-    }
     else if (slow_pong_direction > 0.25) {
         slow_pong_xspeed *= -1;
         slow_pong_yspeed *= -1;
     }
     else { slow_pong_xspeed *= -1; }
-    console.log(`${basic_pong_direction} and ${slow_pong_direction}`);
 }
 
 // For keyboard presses.
@@ -500,7 +495,6 @@ drawPong(pong_size);
 drawSlowPong(slow_pong_size);
 resetPong();
 pauseGame();
-//console.log(`${pong_yspeed} and ${slow_pong_yspeed}`);
 play();
 
 // Check for the player to use the keyboard keys (on the canvas element). 
