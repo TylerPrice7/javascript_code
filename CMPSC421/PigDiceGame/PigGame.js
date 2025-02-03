@@ -176,7 +176,7 @@ document.getElementById("end_turn").addEventListener("mousedown", e => {
 });
 
 // The functions behind the computer. Has a 50/50 chance of rolling or ending turn.
-function playComputer() {
+function playComputer(computer_score) {
     while (computer_turn) {
         let choose_turn = Math.random();
         if (choose_turn >= .5) {
