@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pig Dice Game</title>
+    <style>
+        #scores {
+            display: flex;
+            font-size: 24px;
+            justify-content: space-around;
+            width: 100%;
+            padding-top: 20px;
+        }
+        #turn_scores {
+            display: flex;
+            font-size: 24px;
+            justify-content: space-around;
+            width: 100%;
+            padding-top: 20px;
+        }
+        #dice_visual {
+            display: flex;
+            justify-content: center;
+            visibility: hidden;
+        }
+        #dice_face {
+            display: flex;
+            justify-content: center;
+            margin-top: 100px;
+            visibility: hidden;
+        }
+        #dice_button {
+            display: flex;
+            justify-content: center;
+            margin-top: 100px;
+        }
+        #roll_dice {
+            font-size: 24px;
+            border-radius: 20px;
+            padding: 15px 30px;
+        }
+        #end_turn {
+            font-size: 24px;
+            border-radius: 20px;
+            padding: 15px 30px;
+        }
+        #winner {
+            font-size: 128px;
+            display: flex;
+            justify-content: center;
+            visibility: hidden;
+        }
+        </style>
+</head>
+<body>
+    <div id="scores">
+        <span id="player_score">Player Score: 0</span>
+        <span id="turn">Turn: </span>
+        <span id="computer_score">Computer Score: 0</span>
+    </div>
+    <div id="turn_scores">
+        <span id="player_turn_score">Turn Score: 0</span>
+        <span></span>
+        <span id="computer_turn_score">Turn Score: 0</span>
+    </div>
+    <div>
+        <span id="winner">Winner Placeholder</span>
+    </div>
+    <div id="dice_visual">
+        <img id="dice_face" src="Dice/dice1.png">
+    </div>
+    <div id="dice_button">
+        <button id="roll_dice">Roll Dice</button>
+        <button id="end_turn">End Turn</button>
+    </div>
+    <script src="PigGame.js"></script>
+    
+</body>
+</html>
