@@ -29,7 +29,7 @@ else {
     computer_turn = true; // computer goes first
     let turn = document.getElementById("turn");
     turn.textContent = "Turn: Computer";
-    playComputer(computer_score);
+    playComputer();
 }
 
 // Draws the scores of the current game and the current round.
@@ -89,7 +89,7 @@ function drawD6(number) {
 
 // Calculates the dice roll.
 function rollD6() {
-    roll = Math.floor(Math.random() * 6 + 1);
+    let roll = Math.floor(Math.random() * 6 + 1);
     return roll;
 }
 
