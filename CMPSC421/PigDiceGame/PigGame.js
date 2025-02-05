@@ -58,7 +58,7 @@ function drawD6(number) {
         return
     }
     let dice_image = document.getElementById("dice_face");
-    switch(number) {
+    switch (number) {
         case 1:
             dice_image.alt = "dice with face 1";
             dice_image.src = "Dice/dice1.png";
@@ -176,7 +176,7 @@ document.getElementById("end_turn").addEventListener("mousedown", e => {
 });
 
 // The functions behind the computer. Has a 50/50 chance of rolling or ending turn.
-function playComputer(computer_score) {
+function playComputer() {
     while (computer_turn) {
         let choose_turn = Math.random();
         if (choose_turn >= .5) {
