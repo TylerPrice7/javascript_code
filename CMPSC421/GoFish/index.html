@@ -4,29 +4,38 @@
     <meta charset="UTF-8" />
     <title>Go Fish</title>
     <style>
-        .back_card {
+        .cards-container {
             display: flex;
             position: absolute;
-            top: 0px; /* Card is placed on top of screen */
-            left: 50%;
-            transform: translateX(-50%); /* Card placed center, then pushed back */
-        }
-        .card_container {
-            display: flex;
-            position: absolute;
-            bottom: 0px; /* Card is placed on bottom of screen */
             left: 50%;
             transform: translateX(-50%); /* Card placed center, then pushed back */
         }
         .cards {
-            display: flex;
-            margin-left: -55px; /* Each subsequent card is on the left card 75px */
+            margin-left: -55px; /* Each subsequent card is on the left card 55px */
             height: 213.75px;
             width: 147px;
         }
+
+        .back-card {
+            top: 0px;
+        }
+
+        .player-cards {
+            bottom: 0px;
+        }
+
+        .player-cards .cards {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .player-cards .cards:hover {
+            transform: translateY(-25%);
+        }
+
         .cards:first-child {
             margin-left: 0px;
         }
+
         .deck {
             position: absolute;
             left: 15px;
@@ -35,8 +44,8 @@
   </head>
   <body>
     <div class="deck" id="deck_of_cards"></div>
-    <div class="back_card" id="computer_cards"></div>
-    <div class="card_container" id="player_cards"></div>
+    <div class="cards-container back-card" id="computer_cards"></div>
+    <div class="cards-container player-cards" id="player_cards"></div>
     <script src="GoFish.js"></script>
   </body>
 </html>
