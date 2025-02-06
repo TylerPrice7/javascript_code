@@ -24,23 +24,19 @@
             height: 213.75px;
             width: 147px;
         }
-
+        .cards:first-child {
+            margin-left: 0px;
+        }
+        .deck {
+            position: absolute;
+            left: 15px;
+        }
     </style>
   </head>
   <body>
-    <div class="back_card">
-        <img class="cards" alt="placeholder" id="card_visual" src="PNG-cards/back.png" style="margin-left: 0">
-        <img class="cards" alt="placeholder" id="card_visual" src="PNG-cards/back.png">
-        <img class="cards" alt="placeholder" id="card_visual" src="PNG-cards/back.png">
-        <img class="cards" alt="placeholder" id="card_visual" src="PNG-cards/back.png">
-    </div>
-    <div class="card_container">
-        <img class="cards" alt="placeholder" id="card_visual" src="PNG-cards/2_of_hearts.png" style="margin-left: 0">
-        <img class="cards" alt="placeholder" src="PNG-cards/2_of_diamonds.png">
-        <img class="cards" alt="placeholder" id="card_visual" src="PNG-cards/2_of_hearts.png">
-        <img class="cards" alt="placeholder" src="PNG-cards/2_of_diamonds.png">
-        <img class="cards" alt="placeholder" id="card_visual" src="PNG-cards/2_of_hearts.png">
-    </div>
+    <div class="deck" id="deck_of_cards"></div>
+    <div class="back_card" id="computer_cards"></div>
+    <div class="card_container" id="player_cards"></div>
     <script src="GoFish.js"></script>
   </body>
 </html>

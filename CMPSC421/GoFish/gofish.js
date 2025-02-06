@@ -16,6 +16,9 @@
     There are 12 pairs of cards.
 */
 // TODO: Set a score for the sets
+const player_card_container = document.getElementById("player_cards");
+const computer_card_container = document.getElementById("computer_cards");
+const deck_container = document.getElementById("deck_of_cards");
 
 function main() {
     let deck_of_cards = initDeck();
@@ -25,19 +28,63 @@ function main() {
     let player_sets = [];
     let computer_deck = [];
     let computer_sets = [];
-    
+
     initPlayersDeck(deck_of_cards, player_deck, computer_deck);
 
     let random_hand = [
-        {suit: "clubs", rank: "A"},
-        {suit: "spades", rank: "A"},
-        {suit: "hearts", rank: "A"},
-        {suit: "hearts", rank: "Q"},
-        {suit: "spades", rank: "A"} ];
+        {suit: "clubs", rank: "ace"},
+        {suit: "spades", rank: "ace"},
+        {suit: "hearts", rank: "ace"},
+        {suit: "hearts", rank: "queen"},
+        {suit: "spades", rank: "ace"} ];
 
     console.log(deck_of_cards);
     console.log(player_deck);
     console.log(computer_deck);
+
+    displayPlayersCards(player_deck);
+    displayComputersCards(computer_deck);
+    displayDeckOfCards(deck_of_cards);
+}
+
+function displayDeckOfCards(deck_of_cards) {
+    let cards_remaining = deck_of_cards.length;
+    let text = "";
+    if (cards_remaining > 1)
+        text = cards_remaining + " cards remain";
+    else if (cards_remaining == 1)
+        text = "1 card remains";
+    else {
+        text = "No cards remain";
+    }
+    let new_text = document.createElement("h2");
+    new_text.setAttribute("class", "deck");
+    new_text.textContent = text;
+    deck_container.append(new_text);
+}
+
+function displayComputersCards(computer_deck) {
+    for (const {} of computer_deck) {
+        let new_img = document.createElement("img");
+        new_img.setAttribute("class", "cards");
+        new_img.src = "PNG-cards/back.png";
+        computer_card_container.append(new_img);
+    }
+}
+
+function displayPlayersCards(player_deck) {
+    for (const card of player_deck) {
+        let new_img = document.createElement("img");
+        new_img.setAttribute("class", "cards");
+        let suit = card.suit;
+        let rank = card.rank;
+        if (rank === "jack" || rank === "queen" || rank === "king")
+            new_img.src = "PNG-cards/" + rank + "_of_" + suit + "2.png";
+        else {
+            new_img.src = "PNG-cards/" + rank + "_of_" + suit + ".png";
+        }
+        player_card_container.append(new_img);
+    }
 }
 
 // Computer picks a random card from their hand and asks player if they have it.
@@ -63,17 +110,17 @@ function takeCards(your_deck, their_deck, card_rank) {
 }
 
 function _takeCards() {
-    let player1_deck = [   {suit: "clubs", rank: "A"},
-                      {suit: "spades", rank: "A"},
-                      {suit: "hearts", rank: "A"},
-                      {suit: "hearts", rank: "Q"},
+    let player1_deck = [   {suit: "clubs", rank: "ace"},
+                      {suit: "spades", rank: "ace"},
+                      {suit: "hearts", rank: "ace"},
+                      {suit: "hearts", rank: "queen"},
                       {suit: "spades", rank: "3"} ];
-    let player2_deck = [   {suit: "clubs", rank: "Q"},
-                        {suit: "spades", rank: "Q"},
-                        {suit: "hearts", rank: "K"},
-                        {suit: "hearts", rank: "Q"},
+    let player2_deck = [   {suit: "clubs", rank: "queen"},
+                        {suit: "spades", rank: "queen"},
+                        {suit: "hearts", rank: "king"},
+                        {suit: "hearts", rank: "queen"},
                         {suit: "spades", rank: "8"} ];
-    takeCards(player1_deck, player2_deck, 'Q');
+    takeCards(player1_deck, player2_deck, 'queen');
     console.log(player1_deck);
     console.log(player2_deck);
 }
@@ -105,11 +152,11 @@ function removeRankFromHand(deck, rank) {
 
 function _moveSets() {
     let random_hand = [
-        {suit: "clubs", rank: "A"},
-        {suit: "spades", rank: "A"},
-        {suit: "hearts", rank: "A"},
-        {suit: "hearts", rank: "Q"},
-        {suit: "spades", rank: "A"} ]
+        {suit: "clubs", rank: "ace"},
+        {suit: "spades", rank: "ace"},
+        {suit: "hearts", rank: "ace"},
+        {suit: "hearts", rank: "queen"},
+        {suit: "spades", rank: "ace"} ]
     let player_sets = [];
     moveSets(random_hand, player_sets);
     console.log(player_sets);
@@ -136,11 +183,11 @@ function _testCheckForCardRank() {
     let random_hand = [
     {suit: "clubs", rank: "9"},
     {suit: "spades", rank: "7"},
-    {suit: "hearts", rank: "K"},
-    {suit: "hearts", rank: "Q"},
+    {suit: "hearts", rank: "king"},
+    {suit: "hearts", rank: "queen"},
     {suit: "spades", rank: "5"} ]
-    assert(checkForCardRank(random_hand, "K") === true); //true
-    assert(!checkForCardRank(random_hand, "A") === false); //false
+    assert(checkForCardRank(random_hand, "king") === true); //true
+    assert(!checkForCardRank(random_hand, "ace") === false); //false
 }
 
 // Checks to see if the player has any sets (4 of the same rank).
@@ -159,18 +206,18 @@ function checkForSets(card_hand) {
 
 function _testCheckForSets() {
     let random_hand = [
-        {suit: "clubs", rank: "A"},
-        {suit: "spades", rank: "A"},
+        {suit: "clubs", rank: "ace"},
+        {suit: "spades", rank: "ace"},
         {suit: "hearts", rank: "9"},
-        {suit: "hearts", rank: "A"},
-        {suit: "diamonds", rank: "A"} ]
+        {suit: "hearts", rank: "ace"},
+        {suit: "diamonds", rank: "ace"} ]
     console.log(checkForSets(random_hand));
 }
 
 // Initialize a deck of cards
 function initDeck() {
     const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
-    const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+    const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace'];
     let deck = [];
 
     for (let suit of suits) {
