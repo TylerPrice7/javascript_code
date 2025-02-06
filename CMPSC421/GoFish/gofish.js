@@ -1,6 +1,6 @@
 // Tyler Price
 // CMPSC 421
-// 
+//
 /*
     Have the player go first. Put all of the cards in an array, and 
     randomize the array. Give the player 5 cards, then the computer 5 cards.
@@ -15,27 +15,116 @@
     (In the normal game, you would continue until all cards are down in stacks).
     There are 12 pairs of cards.
 */
-// TODO: If have a set, save it somewhere
 // TODO: Set a score for the sets
-// TODO: Draw card function
-// TODO: Play Computer function
 
-let deck = initDeck();
-deck = shuffleDeck(deck);
+function main() {
+    let deck_of_cards = initDeck();
+    deck_of_cards = shuffleDeck(deck_of_cards);
 
-let player_deck = [];
-let computer_deck = [];
-initPlayersDeck();
+    let player_deck = [];
+    let player_sets = [];
+    let computer_deck = [];
+    let computer_sets = [];
+    
+    initPlayersDeck(deck_of_cards, player_deck, computer_deck);
 
-function initPlayersDeck() {
+    let random_hand = [
+        {suit: "clubs", rank: "A"},
+        {suit: "spades", rank: "A"},
+        {suit: "hearts", rank: "A"},
+        {suit: "hearts", rank: "Q"},
+        {suit: "spades", rank: "A"} ];
+
+    console.log(deck_of_cards);
+    console.log(player_deck);
+    console.log(computer_deck);
+}
+
+// Computer picks a random card from their hand and asks player if they have it.
+// If they have the card, computer gets all of that rank.
+function playComputer(computer_deck, player_deck) {
+    let deck_size = computer_deck.length;
+    let random_idx = Math.floor(Math.random() * deck_size);
+    let random_card_rank = computer_deck[random_idx].rank;
+    if (checkForCardRank(player_deck, random_card_rank))
+        takeCards(computer_deck, player_deck, random_card_rank); // Player has at least one of that card. Take all of them.
+    else {
+        drawCard(deck_of_cards, computer_deck);
+    }
+}
+
+// Take specified card rank from the opposing player's deck and add it to yours.
+function takeCards(your_deck, their_deck, card_rank) {
+    for (const card of their_deck) {
+        if (card.rank === card_rank)
+            your_deck.push(card);
+    }
+    removeRankFromHand(their_deck, card_rank);
+}
+
+function _takeCards() {
+    let player1_deck = [   {suit: "clubs", rank: "A"},
+                      {suit: "spades", rank: "A"},
+                      {suit: "hearts", rank: "A"},
+                      {suit: "hearts", rank: "Q"},
+                      {suit: "spades", rank: "3"} ];
+    let player2_deck = [   {suit: "clubs", rank: "Q"},
+                        {suit: "spades", rank: "Q"},
+                        {suit: "hearts", rank: "K"},
+                        {suit: "hearts", rank: "Q"},
+                        {suit: "spades", rank: "8"} ];
+    takeCards(player1_deck, player2_deck, 'Q');
+    console.log(player1_deck);
+    console.log(player2_deck);
+}
+
+// Draws a card from the deck.
+function drawCard(deck, hand) {
+    hand.push(deck.pop());
+}
+
+// If there are any sets in the player's deck, move the cards into sets array.
+function moveSets(deck, sets) {
+    let new_set = checkForSets(deck);
+    if (new_set.length >= 1) { // If there is more than 1 set
+        for (const set of new_set) {
+            removeRankFromHand(deck, set); // Removes set of 4 from hand
+            sets.push(set);          // and pushes it to their set pile.
+        }
+    }
+}
+
+// Removes a specified rank from a deck.
+function removeRankFromHand(deck, rank) {
+    // Splices out all cards that have the rank as the set being taken out.
+    for (let card_idx = deck.length-1; card_idx >= 0; card_idx--) {
+        if (deck[card_idx].rank === rank)
+            deck.splice(card_idx, 1); // Starting from this index, remove 1 element.
+    }
+}
+
+function _moveSets() {
+    let random_hand = [
+        {suit: "clubs", rank: "A"},
+        {suit: "spades", rank: "A"},
+        {suit: "hearts", rank: "A"},
+        {suit: "hearts", rank: "Q"},
+        {suit: "spades", rank: "A"} ]
+    let player_sets = [];
+    moveSets(random_hand, player_sets);
+    console.log(player_sets);
+}
+
+// Initializes both player's decks.
+function initPlayersDeck(deck, player1_deck, player2_deck) {
     for (let deal = 0; deal < 5; deal++) {
-        player_deck.push(deck.pop());
-        computer_deck.push(deck.pop());
+        player1_deck.push(deck.pop());
+        player2_deck.push(deck.pop());
     }
 }
 
 // Checks to see if the opposing player has the rank specified.
-function checkForCard(card_hand, card_rank) {
+function checkForCardRank(card_hand, card_rank) {
     for (const card of card_hand) {
         if (card.rank == card_rank)
             return true;
@@ -43,15 +132,15 @@ function checkForCard(card_hand, card_rank) {
     return false;
 }
 
-function _testCheckForCard() {
+function _testCheckForCardRank() {
     let random_hand = [
     {suit: "clubs", rank: "9"},
     {suit: "spades", rank: "7"},
     {suit: "hearts", rank: "K"},
     {suit: "hearts", rank: "Q"},
     {suit: "spades", rank: "5"} ]
-    assert(checkForCard(random_hand, "K") === true); //true
-    assert(!checkForCard(random_hand, "A") === false); //false
+    assert(checkForCardRank(random_hand, "K") === true); //true
+    assert(!checkForCardRank(random_hand, "A") === false); //false
 }
 
 // Checks to see if the player has any sets (4 of the same rank).
@@ -77,11 +166,6 @@ function _testCheckForSets() {
         {suit: "diamonds", rank: "A"} ]
     console.log(checkForSets(random_hand));
 }
-_testCheckForSets();
-
-console.log(deck);
-console.log(player_deck);
-console.log(computer_deck);
 
 // Initialize a deck of cards
 function initDeck() {
@@ -107,3 +191,4 @@ function shuffleDeck(deck) {
     return deck;
 }
 
+main();
