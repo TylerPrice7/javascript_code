@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <title>Go Fish</title>
     <style>
+        .back_card {
+            display: flex;
+            position: absolute;
+            top: 0px; /* Card is placed on top of screen */
+            left: 50%;
+            transform: translateX(-50%); /* Card placed center, then pushed back */
+        }
         .card_container {
             display: flex;
             position: absolute;
@@ -13,7 +20,7 @@
         }
         .cards {
             display: flex;
-            margin-left: -75px; /* Each subsequent card is on the left card 75px */
+            margin-left: -55px; /* Each subsequent card is on the left card 75px */
             height: 213.75px;
             width: 147px;
         }
@@ -21,6 +28,12 @@
     </style>
   </head>
   <body>
+    <div class="back_card">
+        <img class="cards" alt="placeholder" id="card_visual" src="PNG-cards/back.png" style="margin-left: 0">
+        <img class="cards" alt="placeholder" id="card_visual" src="PNG-cards/back.png">
+        <img class="cards" alt="placeholder" id="card_visual" src="PNG-cards/back.png">
+        <img class="cards" alt="placeholder" id="card_visual" src="PNG-cards/back.png">
+    </div>
     <div class="card_container">
         <img class="cards" alt="placeholder" id="card_visual" src="PNG-cards/2_of_hearts.png" style="margin-left: 0">
         <img class="cards" alt="placeholder" src="PNG-cards/2_of_diamonds.png">
