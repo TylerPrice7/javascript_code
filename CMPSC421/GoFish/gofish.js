@@ -16,8 +16,8 @@
     There are 12 pairs of cards.
 */
 // TODO: Set a score for the sets
-const player_card_container = document.getElementById("player_cards");
-const computer_card_container = document.getElementById("computer_cards");
+const player_cards_container = document.getElementById("player_cards");
+const computer_cards_container = document.getElementById("computer_cards");
 const deck_container = document.getElementById("deck_of_cards");
 
 function main() {
@@ -38,43 +38,101 @@ function main() {
         {suit: "hearts", rank: "queen"},
         {suit: "spades", rank: "ace"} ];
 
-    console.log(deck_of_cards);
-    console.log(player_deck);
-    console.log(computer_deck);
+    displayPlayersCards(player_deck);
+    displayComputersCards(computer_deck);
+    displayDeckOfCards(deck_of_cards);
 
+    document.querySelectorAll(".player-cards").forEach(card => {
+        card.addEventListener("click", (e) => {
+            let clicked_card = e.target.id;
+           
+            let card_rank = "";
+            for (let char = 0; char < clicked_card.length; char++) {
+                if (clicked_card[char] === "-") {
+                    card_rank = (clicked_card).slice(0, char);
+                    break;
+                }
+            }
+            play(card_rank, player_deck, computer_deck, player_sets, computer_sets, deck_of_cards);
+        });
+    });
+}
+
+function play(card_rank, player_deck, computer_deck, player_sets, computer_sets, deck_of_cards) {
+    if (checkForCardRank(computer_deck, card_rank))
+        takeCards(player_deck, computer_deck, card_rank);
+    else { drawCard(deck_of_cards, player_deck); }
+    moveSets(player_deck, player_sets);
+
+    displayDecks(player_deck, computer_deck, deck_of_cards);
+    playComputer(computer_deck, player_deck, deck_of_cards);
+    moveSets(computer_deck, computer_sets);
+    displayDecks(player_deck, computer_deck, deck_of_cards);
+    ifWinner(player_deck, computer_deck);
+}
+
+function ifWinner(player_deck, computer_deck) {
+    const your_text = document.querySelector(".winner");
+    const their_text = document.querySelector(".loser");
+    if (your_text.style.visibility === "visible" || their_text.style.visibility === "visible")
+        return true;
+
+    if (player_deck.length === 0) {
+        const text = document.querySelector(".winner");
+        text.style.visibility = "visible";
+        return true;
+    }
+    else if (computer_deck.length === 0) {
+        const text = document.querySelector(".loser");
+        text.style.visibility = "visible";
+        return true;
+    }
+}
+
+function displayDecks(player_deck, computer_deck, deck_of_cards) {
     displayPlayersCards(player_deck);
     displayComputersCards(computer_deck);
     displayDeckOfCards(deck_of_cards);
 }
 
+// Displays text of how many cards are left.
 function displayDeckOfCards(deck_of_cards) {
     let cards_remaining = deck_of_cards.length;
-    let text = "";
+    const text = document.querySelector("h2");
     if (cards_remaining > 1)
-        text = cards_remaining + " cards remain";
+        text.innerHTML = cards_remaining + " cards<br>remain";
     else if (cards_remaining == 1)
-        text = "1 card remains";
+        text.innerHTML = "1 card<br>remains";
     else {
-        text = "No cards remain";
+        text.innerHTML = "No cards<br>remain";
     }
-    let new_text = document.createElement("h2");
-    new_text.setAttribute("class", "deck");
-    new_text.textContent = text;
-    deck_container.append(new_text);
 }
 
+// Displays the computers cards face-down.
 function displayComputersCards(computer_deck) {
+    removeOldCards(".back-card .cards");
     for (const {} of computer_deck) {
         let new_img = document.createElement("img");
         new_img.setAttribute("class", "cards");
         new_img.src = "PNG-cards/back.png";
-        computer_card_container.append(new_img);
+        computer_cards_container.append(new_img);
     }
 }
 
+// Removes old cards from the display using a query.
+function removeOldCards(querySelector) {
+    const old_cards = document.querySelectorAll(querySelector);
+    old_cards.forEach(card => { // There are no old cards the first run.
+        card.remove();
+    })
+}
+
+// Displays the players cards face-up.
 function displayPlayersCards(player_deck) {
+    removeOldCards(".player-cards .cards");
     for (const card of player_deck) {
         let new_img = document.createElement("img");
+        new_img.id = card.rank + "-of-" + card.suit;
         new_img.setAttribute("class", "cards");
         let suit = card.suit;
         let rank = card.rank;
@@ -83,13 +141,13 @@ function displayPlayersCards(player_deck) {
         else {
             new_img.src = "PNG-cards/" + rank + "_of_" + suit + ".png";
         }
-        player_card_container.append(new_img);
+        player_cards_container.append(new_img);
     }
 }
 
 // Computer picks a random card from their hand and asks player if they have it.
 // If they have the card, computer gets all of that rank.
-function playComputer(computer_deck, player_deck) {
+function playComputer(computer_deck, player_deck, deck_of_cards) {
     let deck_size = computer_deck.length;
     let random_idx = Math.floor(Math.random() * deck_size);
     let random_card_rank = computer_deck[random_idx].rank;
@@ -121,13 +179,11 @@ function _takeCards() {
                         {suit: "hearts", rank: "queen"},
                         {suit: "spades", rank: "8"} ];
     takeCards(player1_deck, player2_deck, 'queen');
-    console.log(player1_deck);
-    console.log(player2_deck);
 }
 
 // Draws a card from the deck.
-function drawCard(deck, hand) {
-    hand.push(deck.pop());
+function drawCard(card_deck, hand) {
+    hand.push(card_deck.pop());
 }
 
 // If there are any sets in the player's deck, move the cards into sets array.
@@ -159,7 +215,6 @@ function _moveSets() {
         {suit: "spades", rank: "ace"} ]
     let player_sets = [];
     moveSets(random_hand, player_sets);
-    console.log(player_sets);
 }
 
 // Initializes both player's decks.
@@ -171,8 +226,8 @@ function initPlayersDeck(deck, player1_deck, player2_deck) {
 }
 
 // Checks to see if the opposing player has the rank specified.
-function checkForCardRank(card_hand, card_rank) {
-    for (const card of card_hand) {
+function checkForCardRank(their_hand, card_rank) {
+    for (const card of their_hand) {
         if (card.rank == card_rank)
             return true;
     }
@@ -211,7 +266,6 @@ function _testCheckForSets() {
         {suit: "hearts", rank: "9"},
         {suit: "hearts", rank: "ace"},
         {suit: "diamonds", rank: "ace"} ]
-    console.log(checkForSets(random_hand));
 }
 
 // Initialize a deck of cards
