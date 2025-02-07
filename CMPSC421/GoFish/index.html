@@ -39,11 +39,30 @@
         .deck {
             position: absolute;
             left: 15px;
+            top: 35%;
+            transform: translateY(-50%);
+        }
+
+        .winner {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            visibility: hidden;
+            transform: translate(-50%, -50%);
+        }
+        .loser {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            visibility: hidden;
+            transform: translate(-50%, -50%);
         }
     </style>
   </head>
   <body>
-    <div class="deck" id="deck_of_cards"></div>
+    <h2 class="deck" id="deck_of_cards">42<br>cards<br>remain</h2>
+    <h1 class="winner">YOU WON!!</h1>
+    <h1 class="loser">YOU LOST...</h1>
     <div class="cards-container back-card" id="computer_cards"></div>
     <div class="cards-container player-cards" id="player_cards"></div>
     <script src="GoFish.js"></script>
