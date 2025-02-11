@@ -33,7 +33,7 @@ else {
 }
 
 // Draws the scores of the current game and the current round.
-function drawScore(player, score_type, score_number) {
+function drawScore(player, score_type, score_number, rolled_score=0) {
     if (player === "player") {
         if (score_type === "total") {
             document.getElementById("player_score").textContent = "Player Score: " + score_number;
@@ -45,9 +45,13 @@ function drawScore(player, score_type, score_number) {
     else {
         if (score_type === "total") {
             document.getElementById("computer_score").textContent = "Computer Score: " + score_number;
+            document.getElementById("computer_rolled_score").textContent = "";
             score_number = 0;
             turn_score = 0;
         }
+        if (score_type === "turn" && rolled_score !== 0)
+            document.getElementById("computer_rolled_score").textContent = "Rolled: " + rolled_score;
+        else { document.getElementById("computer_rolled_score").textContent = ""; }
         document.getElementById("computer_turn_score").textContent = "Turn Score: " + score_number;
     }
 }
@@ -95,18 +99,25 @@ function rollD6() {
 
 // Switches turns between the player and the computer
 function switchTurns() {
+    let turn = document.getElementById("turn");
+    turn_score = 0;
     if (player_turn) {
+        drawScore("player", "turn", 0);
+        turn.textContent = "Turn: Computer";
         player_turn = false;
         computer_turn = true;
-        let turn = document.getElementById("turn");
-        turn.textContent = "Turn: Computer";
         playComputer();
     }
     else {
-        player_turn = true;
-        computer_turn = false;
-        let turn = document.getElementById("turn");
-        turn.textContent = "Turn: Player";
+        let pass = document.getElementById("computer_passing");
+        pass.textContent = "Passing...";
+        setTimeout(() => {
+            drawScore("computer", "turn", 0);
+            pass.textContent = "";
+            turn.textContent = "Turn: Player";
+            player_turn = true;
+            computer_turn = false;
+        }, 500);
     }
 }
 
@@ -115,13 +126,8 @@ function switchTurns() {
 function playTurn(current_score) {
     let rolled_score = rollD6();
     drawD6(rolled_score);
-
     // If a 1 is rolled, wait 3 seconds, then switch turns.
     if (rolled_score === 1) {
-        turn_score = 0;
-        if (player_turn)
-            drawScore("player", "turn", turn_score);
-        else { drawScore("computer", "turn", turn_score); }
         switchTurns();
         return;
     }
@@ -130,7 +136,7 @@ function playTurn(current_score) {
     if (player_turn)
         drawScore("player", "turn", turn_score);
     else {
-        drawScore("computer", "turn", turn_score);
+        drawScore("computer", "turn", turn_score, rolled_score);
     }
     if (turn_score + current_score >= 100) {
         current_score += turn_score;
@@ -140,7 +146,7 @@ function playTurn(current_score) {
         }
         else {
             showWinner("computer");
-            drawScore("computer", "total", current_score);
+            drawScore("computer", "total", current_score, rolled_score);
         }
     }
 }
@@ -171,21 +177,24 @@ document.getElementById("end_turn").addEventListener("mousedown", e => {
         player_score += turn_score;
         drawScore("player", "total", player_score);
         switchTurns();
-        playComputer();
     }
 });
 
 // The functions behind the computer. Has a 50/50 chance of rolling or ending turn.
 function playComputer() {
-    while (computer_turn) {
-        let choose_turn = Math.random();
-        if (choose_turn >= .5) {
-            playTurn(computer_score);
-        }
-        else {
-            computer_score += turn_score;
-            drawScore("computer", "total", computer_score);
-            switchTurns();
-        }
+    if (computer_turn) {
+        setTimeout(() => {
+            let choose_turn = Math.random();
+            if (choose_turn >= 0.5) {
+                playTurn(computer_score);
+                playComputer();
+            }
+            else {
+                computer_score += turn_score;
+                drawScore("computer", "total", computer_score);
+                switchTurns();
+            }
+
+        }, 1000);
     }
 }
