@@ -176,20 +176,6 @@ function takeCards(your_deck, their_deck, card_rank) {
     removeRankFromHand(their_deck, card_rank);
 }
 
-function _takeCards() {
-    let player1_deck = [   {suit: "clubs", rank: "ace"},
-                      {suit: "spades", rank: "ace"},
-                      {suit: "hearts", rank: "ace"},
-                      {suit: "hearts", rank: "queen"},
-                      {suit: "spades", rank: "3"} ];
-    let player2_deck = [   {suit: "clubs", rank: "queen"},
-                        {suit: "spades", rank: "queen"},
-                        {suit: "hearts", rank: "king"},
-                        {suit: "hearts", rank: "queen"},
-                        {suit: "spades", rank: "8"} ];
-    takeCards(player1_deck, player2_deck, 'queen');
-}
-
 // Draws a card from the deck.
 function drawCard(card_deck, hand) {
     hand.push(card_deck.pop());
@@ -215,17 +201,6 @@ function removeRankFromHand(deck, rank) {
     }
 }
 
-function _moveSets() {
-    let random_hand = [
-        {suit: "clubs", rank: "ace"},
-        {suit: "spades", rank: "ace"},
-        {suit: "hearts", rank: "ace"},
-        {suit: "hearts", rank: "queen"},
-        {suit: "spades", rank: "ace"} ]
-    let player_sets = [];
-    moveSets(random_hand, player_sets);
-}
-
 // Initializes both player's decks.
 function initPlayersDeck(deck, player1_deck, player2_deck) {
     for (let deal = 0; deal < 5; deal++) {
@@ -243,17 +218,6 @@ function checkForCardRank(their_hand, card_rank) {
     return false;
 }
 
-function _testCheckForCardRank() {
-    let random_hand = [
-    {suit: "clubs", rank: "9"},
-    {suit: "spades", rank: "7"},
-    {suit: "hearts", rank: "king"},
-    {suit: "hearts", rank: "queen"},
-    {suit: "spades", rank: "5"} ]
-    assert(checkForCardRank(random_hand, "king") === true); //true
-    assert(!checkForCardRank(random_hand, "ace") === false); //false
-}
-
 // Checks to see if the player has any sets (4 of the same rank).
 // Returns the rank of the cards that they have sets of 4 for (shouldn't they only have 1 set at a time?)
 function checkForSets(card_hand) {
@@ -266,15 +230,6 @@ function checkForSets(card_hand) {
             sets.push(rank);
     }
     return sets
-}
-
-function _testCheckForSets() {
-    let random_hand = [
-        {suit: "clubs", rank: "ace"},
-        {suit: "spades", rank: "ace"},
-        {suit: "hearts", rank: "9"},
-        {suit: "hearts", rank: "ace"},
-        {suit: "diamonds", rank: "ace"} ]
 }
 
 // Initialize a deck of cards
