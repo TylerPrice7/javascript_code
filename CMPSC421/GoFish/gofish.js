@@ -19,6 +19,8 @@
 const player_cards_container = document.getElementById("player_cards");
 const computer_cards_container = document.getElementById("computer_cards");
 const deck_container = document.getElementById("deck_of_cards");
+const player_sets_id = document.getElementById("player_sets");
+const computer_sets_id = document.getElementById("computer_sets");
 
 function main() {
     let deck_of_cards = initDeck();
@@ -30,14 +32,6 @@ function main() {
     let computer_sets = [];
 
     initPlayersDeck(deck_of_cards, player_deck, computer_deck);
-
-    let random_hand = [
-        {suit: "clubs", rank: "ace"},
-        {suit: "spades", rank: "ace"},
-        {suit: "hearts", rank: "ace"},
-        {suit: "hearts", rank: "queen"},
-        {suit: "spades", rank: "ace"} ];
-
     displayPlayersCards(player_deck);
     displayComputersCards(computer_deck);
     displayDeckOfCards(deck_of_cards);
@@ -64,35 +58,48 @@ function play(card_rank, player_deck, computer_deck, player_sets, computer_sets,
     else { drawCard(deck_of_cards, player_deck); }
     moveSets(player_deck, player_sets);
 
-    displayDecks(player_deck, computer_deck, deck_of_cards);
+    displayDecks(player_deck, computer_deck, deck_of_cards, player_sets, computer_sets);
     playComputer(computer_deck, player_deck, deck_of_cards);
     moveSets(computer_deck, computer_sets);
-    displayDecks(player_deck, computer_deck, deck_of_cards);
-    ifWinner(player_deck, computer_deck);
+    displayDecks(player_deck, computer_deck, deck_of_cards, player_sets, computer_sets);
+    ifWinner(player_deck, computer_deck, player_sets, computer_sets, deck_of_cards);
 }
 
-function ifWinner(player_deck, computer_deck) {
-    const your_text = document.querySelector(".winner");
-    const their_text = document.querySelector(".loser");
-    if (your_text.style.visibility === "visible" || their_text.style.visibility === "visible")
-        return true;
-
+// Checks to see if the game is over. The game is over when all cards are gone.
+function ifWinner(player_deck, computer_deck, player_sets, computer_sets, deck_of_cards) {
     if (player_deck.length === 0) {
-        const text = document.querySelector(".winner");
-        text.style.visibility = "visible";
-        return true;
+        while (computer_deck.length > 0)
+            playComputer(computer_deck, player_deck, deck_of_cards);
     }
-    else if (computer_deck.length === 0) {
-        const text = document.querySelector(".loser");
-        text.style.visibility = "visible";
-        return true;
+    if (player_deck.length === 0 && computer_deck.length === 0 && deck_of_cards.length === 0) {
+        let num_player_sets = player_sets.length;
+        let num_computer_sets = computer_sets.length;
+
+        console.log("Here");
+        // If player has more sets than computer, player wins.
+        if (num_player_sets > num_computer_sets) {
+            const player_win = document.querySelector(".winner");
+            player_win.style.visibility = "visible";
+            return true;
+        }
+        else if (num_player_sets < num_computer_sets) {
+            const player_lose = document.querySelector(".loser");
+            player_lose.style.visibility = "visible";
+            return true;
+        }
     }
 }
 
-function displayDecks(player_deck, computer_deck, deck_of_cards) {
+function displayDecks(player_deck, computer_deck, deck_of_cards, player_sets, computer_sets) {
     displayPlayersCards(player_deck);
     displayComputersCards(computer_deck);
     displayDeckOfCards(deck_of_cards);
+    displaySets(player_sets, computer_sets);
+}
+
+function displaySets(player_sets, computer_sets) {
+    player_sets_id.innerHTML = "Player's Sets: " + player_sets.length;
+    computer_sets_id.innerHTML = "Computer's Sets: " + computer_sets.length;
 }
 
 // Displays text of how many cards are left.
@@ -148,6 +155,8 @@ function displayPlayersCards(player_deck) {
 // Computer picks a random card from their hand and asks player if they have it.
 // If they have the card, computer gets all of that rank.
 function playComputer(computer_deck, player_deck, deck_of_cards) {
+    if (computer_deck.length === 0)
+        return;
     let deck_size = computer_deck.length;
     let random_idx = Math.floor(Math.random() * deck_size);
     let random_card_rank = computer_deck[random_idx].rank;
