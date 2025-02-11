@@ -18,6 +18,21 @@
             width: 100%;
             padding-top: 20px;
         }
+        /* Make rolled score on the right side, aligned under the computer turn score */
+        #computer_rolled_score {
+            display: flex;
+            justify-content: flex-end;
+            font-size: 24px;
+            padding-top: 10px;
+            padding-right: 209px;
+        }
+        #computer_passing {
+            display: flex;
+            justify-content: flex-end;
+            font-size: 24px;
+            padding-top: 10px;
+            padding-right: 220px;
+        }
         #dice_visual {
             display: flex;
             justify-content: center;
@@ -64,6 +79,12 @@
         <span id="computer_turn_score">Turn Score: 0</span>
     </div>
     <div>
+        <span id="computer_rolled_score"></span>
+    <div>
+    <div>
+        <span id="computer_passing"></span>
+    </div>
+
         <span id="winner">Winner Placeholder</span>
     </div>
     <div id="dice_visual">
